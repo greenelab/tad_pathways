@@ -3,28 +3,19 @@
 ##############################
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Exploring TADs - Analytical code for TAD based analysis and visualization
-# Written by: Greg Way
-#
-# Way, G., Greene, C., Grant, S.
+# (C) 2016 Gregory Way
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##############################
 
 ##############################
 # PART 1: DOWNLOAD DATA
 ##############################
-# (A) 1000G project SNPs ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ (1000 Genomes SNPs)
-sh download/download_1000G.sh   # Download the data
-python generate_common-snps.py  # Extract common SNPs from the data
+# Download 1000G Phase III data, hg19 Gencode genes, NHGRI-EBI GWAS Catalog,
+# and hESC TAD domain boundaries
+./download_data.sh
 
-# (B) Get gene coordinates ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz
-sh download/download_gencodegenes.sh
-
-# (C) NHGRI-EBI GWAS Catalog  https://www.ebi.ac.uk/gwas/docs/downloads 
-# The catalog is already downloaded and is placed in data/gwas_catalog_v1.0.tsv
-# SNP rsID mapped to build 144
-
-# (D) hESC Topologically Associated Domains http://compbio.med.harvard.edu/modencode/webpage/hic/hESC_domains_hg19.bed
-sh download/download_TADs.sh
+# Extract common SNPs from 1000 Genomes data
+python generate_common-snps.py
 
 ##############################
 # Part 2: GENERATE INDEX FILES
@@ -39,9 +30,9 @@ python generate_geneidx.py
 ##############################
 # Part 3: Visualize SNP and Genes in TADs
 ##############################
-# This section will output histograms and line graphs of SNP/Gene locations in TADs
+# Output histograms and line graphs of SNP/Gene locations in TADs
 python visualize_SNPS_1000G.py
-python visualize_genes.py  # Also outputs a chi square test for gene start enrichment near boundaries
+python visualize_genes.py  
 
 ##############################
 # Part 4: Extract data from NHGRI-EBI GWAS catalog
@@ -49,8 +40,9 @@ python visualize_genes.py  # Also outputs a chi square test for gene start enric
 # (A) Summarize the catalog by subsetting specific journals
 R --no-save < generate_NHGRI-EBI_GWAS_summary.R
 
-# (B) Linkage disequilibrium correction (https://www.broadinstitute.org/mpg/snap/ldsearchpw.php)
-# Following this analysis, chromosome specific SNP files are saved in '/data/SNAP/' and must be 
+# (B) Linkage disequilibrium correction 
+# (https://www.broadinstitute.org/mpg/snap/ldsearchpw.php)
+# Chromosome specific SNP files are saved in '/data/SNAP/' and must be 
 # fed manually into SNAP with the following parameters:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SNP data set: 1000 Genomes Pilot 1
@@ -63,7 +55,8 @@ R --no-save < generate_NHGRI-EBI_GWAS_summary.R
 # Filter by Array: No
 # Output Columns: D', Genome Coordinates
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# These files should also be saved in '/data/SNAP/' and renamed to '/data/SNAP/SNAP_Results_chr{NUM}.txt'
+# These files should also be saved in '/data/SNAP/' and renamed to
+# '/data/SNAP/SNAP_Results_chr{NUM}.txt'
 
 # (C) Extract only independent SNPs (r2 < 0.2)
 R --no-save < generate_NHGRI-EBI_SNAP_summary.R

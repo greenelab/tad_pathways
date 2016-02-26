@@ -1,6 +1,6 @@
 """
+(C) 2016 Gregory Way
 generate_common-snps.py
-Author: Greg Way
 Modified from https://github.com/dhimmel/kg/blob/master/common-snps.ipynb
 
 Description:
@@ -9,6 +9,7 @@ stratified by chromosome and output a csv of all 1000 Genomes Phase 3
 common SNPs
 
 Usage:
+Is called by 'ANALYSIS.sh' but can also be run through:
 Command line 'python generate_common-snps.py' (must have 1000 genomes VCF
 files in data/raw1000G)
 
@@ -16,6 +17,7 @@ Output:
 Will keep common SNPs in the 1000 Genomes Project Phase 3 data and write out
 new subset vcf.gz files in 'data/subsetvcf'
 """
+
 import os
 import subprocess
 import vcf

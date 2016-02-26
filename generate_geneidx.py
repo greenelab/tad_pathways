@@ -1,13 +1,14 @@
 """
+(C) 2016 Gregory Way
 generate_geneidx.py
-Author: Greg Way
 
 Description:
 Map reference genes to TADs based on genomic locations. For this iteration we
 are considering the hg19 assembly.
 
 Usage:
-Run from command line 'python generate_geneidx.py'
+Is called by 'ANALYSIS.sh' but can also be run through:
+Command line 'python generate_geneidx.py'
 
 Output:
 The script will output a pickle file that will store a python dictionary to

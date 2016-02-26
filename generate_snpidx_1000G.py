@@ -1,13 +1,14 @@
 """
+(C) 2016 Gregory Way
 generate_snpidx_1000G.py
-Author: Greg Way
 
 Description:
 Map GWAS SNP information to TADs based on genomic locations. We are considering
 the GRCh37/hg19 genome build for both SNP positions/TAD locations respectively.
 
 Usage:
-Run from command line 'python generate_snpidx_1000G.py'
+Is called by 'ANALYSIS.sh' but can also be run through:
+Command line 'python generate_snpidx_1000G.py'
 
 Output:
 The script will output a pickle file that will store a python dictionary to
