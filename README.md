@@ -33,11 +33,11 @@ which first downloads pertinent data and also outputs all figures.
 #######################
 
 # Python 2.7
-* pandas
+* pandas (0.17.1)
 * pickle
 * subprocess
-* vcf
+* vcf (0.6.7)
 
 # R 3.2.3
-* readr
+* readr (0.2.2)
 
