@@ -51,6 +51,9 @@ def initialize_TAD_dictionary(TAD_LOC):
     # Add a place to store SNPs that fall in TAD boundaries
     TADdict['Boundary'] = []
 
+    # Add Y chromosome
+    TADdict['Y'] = []
+
     return TADdict
 
 
@@ -65,7 +68,7 @@ def parse_TAD_name(tad_name):
     tad_name = str(tad_name)
     tad_name_ID_pos = tad_name.split(':')
     tad_position = tad_name_ID_pos[1].split('-')
-    return [tad_name[0], int(tad_position[0]), int(tad_position[1])]
+    return [tad_name_ID_pos[0], int(tad_position[0]), int(tad_position[1])]
 
 
 def parse_gene_gtf(gene_info):
@@ -97,7 +100,7 @@ def parse_SNP_position(snp_info):
     Output:
     The position of the SNP
     '''
-    return int(x['POSITION'])
+    return int(snp_info['POSITION'])
 
 
 def ID_TAD_bins(tadkey, bins, start_pos, IDtype='SNP'):

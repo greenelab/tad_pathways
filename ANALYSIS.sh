@@ -18,29 +18,22 @@
 python generate_common-snps.py
 
 ##############################
-# Part 2: GENERATE INDEX FILES
+# PART 2: PROCESS DATA
 ##############################
-# Each index file will map to TAD identifiers and enable fast lookup
-# (A) Generate 1000G SNP based index files
+# Generate index files (maps to TAD identifiers to enable fast lookup)
+# (A) Generate 1000G SNP based index file
 python generate_snpidx.1000G.py
 
-# (B) Generate gene based index files
+# (B) Generate gene based index file
 python generate_geneidx.py
 
 ##############################
-# Part 3: Visualize SNP and Genes in TADs
-##############################
-# Output histograms and line graphs of SNP/Gene locations in TADs
-python visualize_SNPS_1000G.py
-python visualize_genes.py  
-
-##############################
-# Part 4: Extract data from NHGRI-EBI GWAS catalog
+# PART 3: Extract data from NHGRI-EBI GWAS catalog
 ##############################
 # (A) Summarize the catalog by subsetting specific journals
-R --no-save < generate_NHGRI-EBI_GWAS_summary.R
+R --no-save < NHGRI-EBI_GWAS_summary.R
 
-# (B) Linkage disequilibrium correction 
+# (B) LD correction -- Manual Step
 # (https://www.broadinstitute.org/mpg/snap/ldsearchpw.php)
 # Chromosome specific SNP files are saved in '/data/SNAP/' and must be 
 # fed manually into SNAP with the following parameters:
@@ -59,7 +52,16 @@ R --no-save < generate_NHGRI-EBI_GWAS_summary.R
 # '/data/SNAP/SNAP_Results_chr{NUM}.txt'
 
 # (C) Extract only independent SNPs (r2 < 0.2)
-R --no-save < generate_NHGRI-EBI_SNAP_summary.R
+R --no-save < NHGRI-EBI_SNAP_summary.R
 
-# (D) Visualize independent signals in TADs
-python TAD_independent_snps.py
+##############################
+# PART 4: Visualize SNPs and Genes in TADs
+##############################
+# Output histograms and line graphs of SNP/Gene locations in TADs
+python visualize_SNPS_1000G.py
+python visualize_genes.py
+python visualize_independent_snps.py
+
+##############################
+# PART 5: Network Prioritization of Trait Genes using TADs
+##############################
