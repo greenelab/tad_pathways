@@ -65,3 +65,8 @@ python visualize_independent_snps.py
 ##############################
 # PART 5: Network Prioritization of Trait Genes using TADs
 ##############################
+# Extract TAD based genes
+python build_TAD_genelists.py
+
+# Network prioritization using these gene lists
+python build_TAD_networks.py

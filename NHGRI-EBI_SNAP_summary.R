@@ -14,8 +14,6 @@
 # A table of independent SNPs and corresponding genomic locations
 # A scatterplot of number of independent SNPs per chromosome
 
-library(readr)
-
 # Load all SNAP results -- See 'NHGRI_EBI_GWAS_summary.R'
 snap_file_dir <- c('data/SNAP/')
 snap_files <- list.files(snap_file_dir)[grepl('SNAP_Results', 
@@ -86,7 +84,7 @@ find_independent_snps <- function(snap_file, chromosome) {
 # Analysis and write output to file
 all_independent_snps <- c()
 for (snap_fh in snap_files) {
-  snap <- read_tsv(paste(snap_file_dir, snap_fh, sep = ""))
+  snap <- readr::read_tsv(paste(snap_file_dir, snap_fh, sep = ""))
   chrom <- unlist(strsplit(unlist(strsplit(snap_fh, '_'))[3], '[.]'))[1]
   chrom <- substring(chrom, 4, nchar(chrom))
   all_independent_snps <- rbind(all_independent_snps, 
@@ -95,13 +93,13 @@ for (snap_fh in snap_files) {
 
 write.table(all_independent_snps, 
             'output/all_independent_snps_across_traits.csv', sep = ',', 
-            col.names = F, row.names = F)
+            col.names = T, row.names = F)
 
 summary_snps <- as.data.frame(table(all_independent_snps[,2]))
 png("figures/independent_SNP_by_chromosome.png", height = 500, width = 600)
 plot(as.numeric(paste(summary_snps[,1])), summary_snps[,2], pch = 16,
      xlab = 'Chromosome', 
      ylab = 'Number of independent SNPs', 
-     main = paste("Summary of Independent SNPs across each chromosome \n",
-            "(299 Traits/Diseases in Replication-Required Journals)", sep = ""))
+     main = paste0("Summary of Independent SNPs across each chromosome \n",
+            "(299 Traits/Diseases in Replication-Required Journals)"))
 dev.off()

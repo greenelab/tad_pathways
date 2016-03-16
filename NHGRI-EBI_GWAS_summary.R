@@ -3,7 +3,7 @@
 
 # Description: 
 # Process the entire NHGRI-EBI GWAS catalog and parse out disease/trait specific
-# information for subsets GWAS findings (only those found in replication
+# information for subsets of GWAS findings (only those found in replication
 # required journals)
 
 # Usage:
@@ -14,17 +14,12 @@
 # Several chromosome specific tables and a large summary table of all findings
 # and a histogram of number of SNPs per trait/disease
 
-library(readr)
-
 # Load data
-gwas_catalog <- read_tsv("data/gwas_catalog_v1.0.1.tsv")
+gwas_catalog <- readr::read_tsv("data/gwas_catalog_v1.0.1.tsv")
 
 # Filter data to only replication required journals
 repl_journals <- c("N Engl J Med", "Science", "Nature", "Nat Genet", "Lancet")
-gwas_filter <- c()
-for (jnl in repl_journals) {
-  gwas_filter <- rbind(gwas_filter, gwas_catalog[gwas_catalog$JOURNAL == jnl, ])
-}
+gwas_filter <- gwas_catalog[gwas_catalog$JOURNAL %in% repl_journals, ]
 
 # Summarize the data and write to file
 gwas_traitinfo = list()
@@ -40,9 +35,9 @@ for (trait in traits) {
                                               'PUBMEDID')]
   trait_name <- gsub(' ', '_', trait)
   trait_name <- gsub('[/:(),.-]', '_', trait_name)
-  filename = paste('data/gwas_catalog/', trait_name, '.txt', sep = "")
+  filename = paste0('data/gwas_catalog/', trait_name, '.tsv')
   print(filename)
-  write.table(gwas_traitinfo[[trait]], filename, sep = '\t', row.names = F)
+  readr::write_tsv(gwas_traitinfo[[trait]], filename)
 }
 
 num_snp_order <- order(table(gwas_filter$`DISEASE/TRAIT`), decreasing = T)
@@ -64,7 +59,7 @@ gwas_use_data_chrom <- list()
 for (chrom in 1:length(unique(gwas_use_data$CHR_ID))){
   gwas_use_data_chrom[[chrom]] <- gwas_use_data[gwas_use_data$CHR_ID == chrom, ]
   write.table(gwas_use_data_chrom[[chrom]], 
-              paste('data/SNAP/all_unique_snps_chr', chrom, '.txt', sep = ""), 
+              paste0('data/SNAP/all_unique_snps_chr', chrom, '.txt'), 
               col.names = F, row.names = F, quote = F, sep = '\t')
 }
 
