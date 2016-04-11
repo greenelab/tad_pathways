@@ -42,6 +42,12 @@ TADdict = dict.fromkeys(TADdict)
 for key in TADdict.iterkeys():
     TADdict[key] = 0
 
+# Initialize a chromosome specific dictionary holding bin specific info
+Chromosome_Specific_TAD = dict.fromkeys(KG_TADs.keys())
+for chromkey in Chromosome_Specific_TAD.keys():
+    # Create a list of zeros of len(NUM_BINS)
+    Chromosome_Specific_TAD[chromkey] = [0] * (NUM_BINS)
+
 # Also observe distribution of amount of SNPs in each TAD
 howmanySNPsinTAD = []
 
@@ -64,8 +70,13 @@ for key in KG_TADs.iterkeys():
                     else:
                         SNP_side[1] += 1
 
+                    # Add a count for chromsome specificity
+                    Chromosome_Specific_TAD[key][bin_assign] += 1
+
 # Convert to DataFrame
 SNPLocations = pd.DataFrame.from_dict(TADdict, orient='index')
+SNPLoc_chrom = pd.DataFrame.from_dict(Chromosome_Specific_TAD, orient='index')
+SNPLoc_chrom = SNPLoc_chrom.transpose()
 
 ####################
 # Perform ChiSquare test of SNPs to 'right' of TAD
@@ -89,6 +100,21 @@ plt.title('SNP location inside TADs')
 plt.grid(True)
 plt.savefig('figures/SNPlocations_TADs_1000G_hg19.png')
 plt.close()
+
+#####################################
+# Plot Chromosome Specific Line Graphs
+#####################################
+for chrom in Chromosome_Specific_TAD.keys():
+    if chrom not in ['NoTAD', 'Boundary', 'X', 'Y']:
+        nameplot = 'figures/chrom/SNPdistribution_chrom_' + chrom + '_' + str(NUM_BINS) + 'bins.png'
+        chrom_loc = SNPLoc_chrom[chrom]
+        chrom_loc.plot()
+        plt.xlabel('Bins (Normalized TAD length)')
+        plt.ylabel('Frequency')
+        plt.title('SNP location inside TADs\nChromosome ' + str(chrom))
+        plt.grid(True)
+        plt.savefig(nameplot)
+        plt.close()
 
 # Histogram
 n, bins, patches = plt.hist(howmanySNPsinTAD, NUM_BINS, normed=1,

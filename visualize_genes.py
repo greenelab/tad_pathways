@@ -29,7 +29,7 @@ from scipy.stats import chisquare
 # Load picklefile
 ####################################
 TADdictgenes = pd.read_pickle('output/Gene_Assignments_In_TADs_hg19.p')
-
+print TADdictgenes['5']['1054:76404244-76804244']
 ####################################
 # Load Constants
 ####################################
@@ -52,6 +52,13 @@ TADgenepos = dict.fromkeys(gene_types)
 for genekey in gene_types:
     # Create a list of zeros of len(NUM_BINS)
     TADgenepos[genekey] = [0] * (NUM_BINS)
+
+# Initialize a chromosome specific dictionary holding bin specific info
+Chromosome_Specific_TAD = dict.fromkeys(TADdictgenes.keys())
+for chromkey in Chromosome_Specific_TAD.keys():
+    if chromkey not in ['Boundary']:
+        # Create a list of zeros of len(NUM_BINS)
+        Chromosome_Specific_TAD[chromkey] = [0] * (NUM_BINS)
 
 # Determine significance of 'leftness' of TADs
 TAD_near_boundary = [0, 0]
@@ -102,8 +109,12 @@ for key, value in TADdictgenes.iteritems():
                         TAD_nb_rRNA[1] += 1
                     TAD_near_boundary[1] += 1
 
+                # Add a count for chromsome specificity
+                Chromosome_Specific_TAD[key][binID] += 1
+
 # Convert to pandas dataframe
 geneLocations = pd.DataFrame(TADgenepos)
+chromLocations = pd.DataFrame(Chromosome_Specific_TAD)
 
 ####################
 # Perform ChiSquare test of TAD near boundary
@@ -141,6 +152,35 @@ for g in gene_types:
     plt.grid(True)
     plt.savefig(nameplot)
     plt.close()
+
+#####################################
+# Plot Chromosome Specific Line Graphs
+#####################################
+# Separate Graphs
+for chrom in Chromosome_Specific_TAD.keys():
+    if chrom not in ['Boundary']:
+        nameplot = 'figures/chrom/GeneDistribution_chrom_' + chrom + '_' + str(NUM_BINS) + 'bins.png'
+        chrom_loc = chromLocations[chrom]
+        chrom_loc.plot()
+        plt.xlabel('Bins (Normalized TAD length)')
+        plt.ylabel('Frequency')
+        plt.title('Gene location (Start Site) inside TADs\nChromosome ' + str(chrom))
+        plt.grid(True)
+        plt.savefig(nameplot)
+        plt.close()
+
+# Combined Graph
+for chrom in Chromosome_Specific_TAD.keys():
+    if chrom not in ['Boundary']:
+        chrom_loc = chromLocations[chrom]
+        chrom_loc.plot()
+        plt.xlabel('Bins (Normalized TAD length)')
+        plt.ylabel('Frequency')
+        plt.title('Gene location (Start Site) inside TADs\nby Chromosome')
+        plt.grid(True)
+
+plt.savefig('figures/chrom/GeneDistribution_chromosomes.png')
+plt.close()
 
 ####################################
 # Obtain the number of genes in each TAD

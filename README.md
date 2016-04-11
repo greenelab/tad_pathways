@@ -26,7 +26,7 @@ a single command:
 ~~~~~~~~~~~~~~~~~~
 ./ANALYSIS.sh
 ~~~~~~~~~~~~~~~~~~
-which first downloads pertinent data and also outputs all figures.
+which downloads data, performs analyses, and outputs all figures.
 
 #######################
 # DEPENDENCIES
@@ -34,7 +34,8 @@ which first downloads pertinent data and also outputs all figures.
 # Python 2.7
 * pandas (0.17.1)
 * vcf (0.6.7)
-* scipy ((0.14.0)
+* scipy (0.14.0)
+* scikit-learn (0.16.1)
 
 # R 3.2.3
 * readr (0.2.2)
@@ -42,3 +43,4 @@ which first downloads pertinent data and also outputs all figures.
 # Linux (Ubuntu 14.04)
 * plink (1.07)
 * vcftools (0.1.11)
+* Hubber (Sleipnir Library)(1.0)

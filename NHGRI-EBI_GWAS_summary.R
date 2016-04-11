@@ -59,7 +59,7 @@ gwas_use_data_chrom <- list()
 for (chrom in 1:length(unique(gwas_use_data$CHR_ID))){
   gwas_use_data_chrom[[chrom]] <- gwas_use_data[gwas_use_data$CHR_ID == chrom, ]
   write.table(gwas_use_data_chrom[[chrom]], 
-              paste0('data/SNAP/all_unique_snps_chr', chrom, '.txt'), 
+              paste0('data/SNAP/all_unique_snps_chr', chrom, '.tsv'), 
               col.names = F, row.names = F, quote = F, sep = '\t')
 }
 

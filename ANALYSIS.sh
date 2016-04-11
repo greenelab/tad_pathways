@@ -27,11 +27,14 @@ python generate_snpidx.1000G.py
 # (B) Generate gene based index file
 python generate_geneidx.py
 
+# (C) Convert GWAS Catalog to hg19
+python convert_GWAS_catalog_hg19.py
+
 ##############################
 # PART 3: Extract data from NHGRI-EBI GWAS catalog
 ##############################
 # (A) Summarize the catalog by subsetting specific journals
-R --no-save < NHGRI-EBI_GWAS_summary.R
+Rscript NHGRI-EBI_GWAS_summary.R
 
 # (B) LD correction -- Manual Step
 # (https://www.broadinstitute.org/mpg/snap/ldsearchpw.php)
@@ -52,7 +55,7 @@ R --no-save < NHGRI-EBI_GWAS_summary.R
 # '/data/SNAP/SNAP_Results_chr{NUM}.txt'
 
 # (C) Extract only independent SNPs (r2 < 0.2)
-R --no-save < NHGRI-EBI_SNAP_summary.R
+Rscript NHGRI-EBI_SNAP_summary.R
 
 ##############################
 # PART 4: Visualize SNPs and Genes in TADs
