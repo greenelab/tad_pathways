@@ -45,7 +45,7 @@ VCF_FILES += [
 ##################
 
 
-def get_majar_af(aafs):
+def get_major_af(aafs):
     """
     Returns the major allele frequency from
     the list of alternate allele frequencies.
@@ -85,7 +85,7 @@ with open('data/common-snps.tsv', 'w') as writer_fh:
                 continue
 
             # Major allele frequency check
-            major_af = get_majar_af(r.INFO['AF'])
+            major_af = get_major_af(r.INFO['AF'])
             if major_af > MAJOR_AF_MAX:
                 print(major_af)
                 continue

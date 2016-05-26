@@ -153,3 +153,17 @@ def parse_gene_info(gene_info):
         start = int(gene_info['end'])
     output = [gtype, chrom, start]
     return output
+
+
+def parse_repeat_info(repeat_info):
+    '''
+    Parameters:
+    repeat_info - a row in repeat pandas DataFrame
+
+    Output:
+    repeat information [type, chromosome, start]
+    '''
+    repeat_type = repeat_info['repeat']
+    chrom = repeat_info['chrom']
+    start = repeat_info['begin']
+    return [repeat_type, chrom, start]
