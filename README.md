@@ -43,34 +43,34 @@ analysis:
 Run a [WebGestalt](http://bioinfo.vanderbilt.edu/webgestalt/ "Pathway Analysis")
 pathway analysis on the gene lists for the above traits.
 
-WebGestalt Parameters:
-* Select gene ID type: hsapiens__gene_symbol
-* Enrichment Analysis: GO Analysis
-* GO Slim Classification: Yes
-* Reference Set: hsapiens__genome
-* Statistical Method: Hypergeometric
-* Multiple Test Adjustment: BH
-* Significance Level: Top10
-* Minimum Number of Genes for a Category: 4 
+# WebGestalt Parameters
+* Select gene ID type *hsapiens__gene_symbol*
+* Enrichment Analysis *GO Analysis*
+* GO Slim Classification *Yes*
+* Reference Set *hsapiens__genome*
+* Statistical Method *Hypergeometric*
+* Multiple Test Adjustment *BH*
+* Significance Level *Top10*
+* Minimum Number of Genes for a Category *4*
 
-Note - The output of ANALYSIS.sh in 'data/TAD_based_genes' for all traits is
+Note - The output of ANALYSIS.sh in *data/TAD_based_genes* for all traits is
 ready for TAD Pathway Analysis.
 
 #######################
 # GWAS/eQTL INTEGRATION
 #######################
-Data Access -- see download_data.sh for more details
+# Data Access  (see download_data.sh for more details)
 * GWAS Catalog (2016-02-25)
 * eQTL (2016-05-09) (http://www.ncbi.nlm.nih.gov/projects/gap/eqtl/index.cgi)
 
-Nearest gene GWAS reports:
-* Bone Mineral Density - http://www.ncbi.nlm.nih.gov/pubmed/22504420
-* Inflammatory Bowel Disease - http://www.ncbi.nlm.nih.gov/pubmed/?term=26192919
+# Nearest gene GWAS reports
+* Bone Mineral Density (http://www.ncbi.nlm.nih.gov/pubmed/22504420)
+* Inflammatory Bowel Disease (http://www.ncbi.nlm.nih.gov/pubmed/?term=26192919)
 
-eQTL Browser Parameters:
-* Analysis ID - All
-* Association Test Significance Filters - p-value 1 x 10^-1
-* Phenotype Traits - 'Bone mineral density', 'Inflammatory bowel disease'
+# eQTL Browser Parameters
+* Analysis ID (All)
+* Association Test Significance Filters (p-value 1 x 10^-1)
+* Phenotype Traits  (*Bone mineral density*, *Inflammatory bowel disease*)
 
 #######################
 # DEPENDENCIES
