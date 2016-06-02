@@ -10,6 +10,7 @@
 # 4) NHGRI-EBI GWAS Catalog
 # 5) UCSC hg38/hg19 LiftOver Chain File
 # 6) hESC TAD domain boundaries
+# 7) hg19 sequence
 
 # Usage:
 # This script is run once by 'ANALYSIS.sh'
@@ -21,6 +22,7 @@
 # 4) Catalog of all significant GWAS findings ('data/')
 # 5) UCSC coordinates mapping file ('data/')
 # 6) BED file of hg19 hESC TAD boundaries (Dixon et al. 2012; 'data/')
+# 7) FASTA files for each hg19 chromosome
 
 ######################
 # 1) 1000 Genomes Phase III
@@ -50,7 +52,7 @@ base_url='ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/'\
 
 wget '--directory-prefix='$download_folder $base_url
 
-gunzip 'data/hg19.fa.out.gz'
+gunzip 'data/gencode.v19.annotation.gtf.gz'
 
 ######################
 # 3) Repeat Elements
@@ -60,7 +62,7 @@ base_url='www.repeatmasker.org/genomes/hg19/RepeatMasker-rm405-db20140131/'\
 
 wget '--directory-prefix='$download_folder $base_url
 
-gunzip 'data/gencode.v19.annotation.gtf.gz'
+gunzip 'data/hg19.fa.out.gz'
 sed 's/ \+/\t/g' data/hg19.fa.out > data/hg19.fa.out.tsv
 
 ######################
@@ -87,4 +89,24 @@ base_url='http://compbio.med.harvard.edu/modencode/webpage/hic/'\
 'hESC_domains_hg19.bed'
 
 wget '--directory-prefix='$download_folder $base_url
+
+######################
+# 7) hg19 FASTA files
+######################
+hg19_download_folder='data/hg19_fasta/'
+base_url='http://hgdownload.cse.ucsc.edu/goldenPath/hg19/chromosomes/chr'
+end_url='.fa.gz'
+
+# Download somatic chromosomes
+for chrom in $(seq 22)
+do
+  wget '--directory-prefix='$hg19_download_folder $base_url$chrom$end_url
+  gunzip $hg19_download_folder'chr'$chrom$end_url
+done
+
+# Download sex chromosomes
+wget '--directory-prefix='$hg19_download_folder $base_url'X.fa.gz'
+gunzip $hg19_download_folder'chrX.fa.gz'
+wget '--directory-prefix='$hg19_download_folder $base_url'Y.fa.gz'
+gunzip $hg19_download_folder'chrY.fa.gz'
 

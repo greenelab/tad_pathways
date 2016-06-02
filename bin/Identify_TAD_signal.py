@@ -64,20 +64,25 @@ with open(GWAS_DATA) as gwasfile:
         else:
             chrom = row[1][3:]
             snploc = int(row[2])
+            # Find the TAD where the SNP is located
             tad = TADLoc.ix[(TADLoc.chrom == chrom) &
                             (TADLoc.TADStart <= snploc) &
                             (TADLoc.TADEnd > snploc)]
 
+            # Clean up mapped genes
+            mapgene = row[5].replace(' - ', ',')
+            mapgene = mapgene.replace(' ', '')
+
             if len(tad) == 0:
-                tad = [row[0], row[1], int(row[2]), 'NA', 'NA', 'NA', row[5]]
+                tad = [row[0], row[1], int(row[2]), 'NA', 'NA', 'NA', mapgene]
             else:
                 # The mapped gene is the closest gene in proximity to the SNP
                 # In the event that two genes are present, the gene on the left
                 # is the closest gene to the left and right is closest on right.
                 # Add both to the mapped gene list
-                mappedgene = ','.join(row[5].split('-'))
                 tad = [row[0], row[1], int(row[2]), tad.iloc[0, 1],
-                       tad.iloc[0, 2], tad.iloc[0, 3], mappedgene]
+                       tad.iloc[0, 2], tad.iloc[0, 3], mapgene]
+
             SNP_TADassign.append(tad)
 
 ####################################

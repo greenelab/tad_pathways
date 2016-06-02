@@ -38,7 +38,7 @@ input the TAD based gene lists for the following two diseases into pathway
 analysis:
 
 * Bone Mineral Density (1,297 genes for TAD pathway)
-* Inflammatory Bowel Disease (2,270 genes)
+* Type 2 Diabetes (1,567 genes)
 
 Run a [WebGestalt](http://bioinfo.vanderbilt.edu/webgestalt/ "Pathway Analysis")
 pathway analysis on the gene lists for the above traits.
@@ -61,11 +61,11 @@ ready for TAD Pathway Analysis.
 #######################
 # Data Access  (see download_data.sh for more details)
 * GWAS Catalog (2016-02-25)
-* eQTL (2016-05-09) (http://www.ncbi.nlm.nih.gov/projects/gap/eqtl/index.cgi)
+* eQTL (2016-05-09) [eQTL Browser](http://www.ncbi.nlm.nih.gov/projects/gap/eqtl/index.cgi, "eQTL")
 
 # Nearest gene GWAS reports
-* Bone Mineral Density (http://www.ncbi.nlm.nih.gov/pubmed/22504420)
-* Inflammatory Bowel Disease (http://www.ncbi.nlm.nih.gov/pubmed/?term=26192919)
+* [Bone Mineral Density]((http://www.ncbi.nlm.nih.gov/pubmed/22504420 "BMD")
+* [Type 2 Diabetes](http://www.ncbi.nlm.nih.gov/pubmed/22885922 "T2D")
 
 # eQTL Browser Parameters
 * Analysis ID (All)
