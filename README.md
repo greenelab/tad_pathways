@@ -81,6 +81,7 @@ ready for TAD Pathway Analysis.
 * scipy (0.14.0)
 * scikit-learn (0.16.1)
 * pyliftover (0.3)
+* biopython (1.66)
 
 # R 3.3.0
 * readr (0.2.2)
