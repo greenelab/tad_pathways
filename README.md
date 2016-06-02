@@ -64,7 +64,7 @@ ready for TAD Pathway Analysis.
 * eQTL (2016-05-09) [eQTL Browser](http://www.ncbi.nlm.nih.gov/projects/gap/eqtl/index.cgi, "eQTL")
 
 # Nearest gene GWAS reports
-* [Bone Mineral Density]((http://www.ncbi.nlm.nih.gov/pubmed/22504420 "BMD")
+* [Bone Mineral Density](http://www.ncbi.nlm.nih.gov/pubmed/22504420 "BMD")
 * [Type 2 Diabetes](http://www.ncbi.nlm.nih.gov/pubmed/22885922 "T2D")
 
 # eQTL Browser Parameters
