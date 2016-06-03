@@ -119,11 +119,12 @@ with open('results/TAD_SNP_rightness_Chisquare.txt', 'w') as chisq_fh:
 # Visualization
 ####################################
 # SNP Distribution
+
 SNPLocations.plot()
 plt.xlabel('Bins (Normalized TAD length)')
 plt.ylabel('Frequency')
 plt.title('SNP location inside TADs')
-plt.grid(True)
+plt.grid(False)
 plt.savefig('figures/SNPlocations_TADs_1000G_hg19.png')
 plt.close()
 

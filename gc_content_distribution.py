@@ -15,16 +15,10 @@ GC Content distribution and histogram across TADs
 import sys
 sys.path.insert(1, 'bin/')
 from util import parse_TAD_name
-from util import parse_SNP_position
-from util import parse_gene_info
-from util import parse_repeat_info
-from util import ID_TAD_bins
 import random
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 plt.figure.max_open_warning = 0
-from scipy.stats import chisquare
 from Bio import SeqIO
 
 random.seed(123)
@@ -191,8 +185,15 @@ for chrom in TADdictgenes.keys():
 gc_distribution = pd.DataFrame(gc_distribution)
 
 fig, ax = plt.subplots()
-gc_distribution.boxplot(column=range(0, 50), notch=True, positions=range(0, 50))
-ax.set_xticks(range(0, 50))
-ax.set_xticklabels(range(0, 50))
-fig.set_size_inches(15, 10)
+gc_distribution.boxplot(column=range(0, 50), notch=True, positions=range(0, 50),
+                        return_type='dict')
+ax.set_xticklabels(0)
+ax.tick_params(axis=u'both', which=u'both', length=0)
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
+#fig.set_size_inches(15, 10)
+plt.grid(False)
+plt.xlabel('Bins (Normalized TAD length)')
+plt.ylabel('GC Percentage')
+plt.title('GC Content Across TADs')
 plt.savefig('figures/gc_distribution.png')
