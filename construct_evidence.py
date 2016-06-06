@@ -69,17 +69,13 @@ for gene in all_genes:
             assignment = assignment + '_tad'
         if assignment == 'gwas_eqtl_tad':
             assignment = 'all'
-
-    if gene in eqtl_genes:
-        if gene not in gwas_genes:
+    else:
+        if gene in eqtl_genes:
             assignment = 'eqtl'
             if gene in pathway_genes:
                 assignment = assignment + '_tad'
-
-    if gene in pathway_genes:
-        if gene not in gwas_genes:
-            if gene not in eqtl_genes:
-                assignment = 'tad'
+        else:
+            assignment = 'tad'
 
     all_assignments.append(assignment)
 

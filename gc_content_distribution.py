@@ -9,7 +9,7 @@ Usage:
 Is called by 'ANALYSIS.sh'
 
 Output:
-GC Content distribution and histogram across TADs
+GC Content distribution and histogram across TADs as a .png file
 """
 
 import sys
