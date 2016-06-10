@@ -30,7 +30,9 @@ def read_gestalt(fh):
     :param fh: the location of the file to read
 
     Output:
-    A dictionary with pathway names as keys, holding enrichment info
+    Two dictionaries:
+    1) Pathway names as keys, holding enrichment info
+    2) Pathway names as keys, holding p value info
     """
 
     pathway_dict = {}
@@ -46,8 +48,8 @@ def read_gestalt(fh):
         for line in trait_fh:
             line = line.strip('\n').split('\t')
 
-            # Test the type of line and perform different operations accordingly
-            # This line is blank, ignore it
+            # Test the line type and perform different operations accordingly
+            # Skip the line if the first element is blank
             if len(line[0]) == 0:
                 continue
 
@@ -93,32 +95,34 @@ def read_gestalt(fh):
 
     return pathway_dict, pathway_pvalue
 
-####################################
-# Load Command Arguments
-####################################
-parser = OptionParser()  # Load command line options
-parser.add_option("-t", "--trait", dest="trait",
-                  help="symbol for trait data", type="string")
-(options, args) = parser.parse_args()
+# Run the command if called by name
+if __name__ == '__main__':
+    ####################################
+    # Load Command Arguments
+    ####################################
+    parser = OptionParser()  # Load command line options
+    parser.add_option("-t", "--trait", dest="trait",
+                      help="symbol for trait data", type="string")
+    (options, args) = parser.parse_args()
 
-####################################
-# Load Constants
-####################################
-TRAIT = options.trait
-TRAIT_FH = 'data/gestalt/' + TRAIT + '_gestalt.tsv'
-OUT_FH = 'data/gestalt/' + TRAIT + '_pathways.p'
-OUT_P_FH = 'data/gestalt/' + TRAIT + '_pvalues.tsv'
+    ####################################
+    # Load Constants
+    ####################################
+    TRAIT = options.trait
+    TRAIT_FH = 'data/gestalt/' + TRAIT + '_gestalt.tsv'
+    OUT_FH = 'data/gestalt/' + TRAIT + '_pathways.p'
+    OUT_P_FH = 'data/gestalt/' + TRAIT + '_pvalues.tsv'
 
-####################################
-# Load and Save Data
-####################################
-gestalt_data, gestalt_p = read_gestalt(TRAIT_FH)
+    ####################################
+    # Load and Save Data
+    ####################################
+    gestalt_data, gestalt_p = read_gestalt(TRAIT_FH)
 
-# Save pickle file for pathway lookup
-pickle.dump(gestalt_data, open(OUT_FH, 'wb'))
+    # Save pickle file for pathway lookup
+    pickle.dump(gestalt_data, open(OUT_FH, 'wb'))
 
-# Process p value data and output to tsv
-gestalt_p = pd.DataFrame.from_dict(gestalt_p, orient='index')
-gestalt_p.columns = ['adjP', 'num_genes']
-gestalt_p = gestalt_p.sort_values(by='adjP')
-gestalt_p.to_csv(OUT_P_FH, sep='\t')
+    # Process p value data and output to tsv
+    gestalt_p = pd.DataFrame.from_dict(gestalt_p, orient='index')
+    gestalt_p.columns = ['adjP', 'num_genes']
+    gestalt_p = gestalt_p.sort_values(by='adjP')
+    gestalt_p.to_csv(OUT_P_FH, sep='\t')
