@@ -15,7 +15,6 @@ a .csv evidence file (two columns: [gene, type of evidence])
 
 from optparse import OptionParser
 import pandas as pd
-import pickle
 
 ####################################
 # Load Command Arguments
@@ -35,7 +34,7 @@ parser.add_option("-p", "--pathway", dest="pathway",
 # Load Constants
 ####################################
 TRAIT = options.trait
-TRAIT_PICKLE = 'data/gestalt/' + TRAIT + '_pathways.p'
+TRAIT_FH = 'data/gestalt/' + TRAIT + '_complete_gestalt.tsv'
 EQTL_FH = options.eqtl
 GWAS_FH = options.gwas
 PATHWAY = options.pathway
@@ -44,8 +43,9 @@ OUTPUT_FH = 'tad_pathway/' + TRAIT + '_gene_evidence.csv'
 ####################################
 # Load Data
 ####################################
-pathway_genes = pd.read_pickle(TRAIT_PICKLE)
-pathway_genes = pathway_genes[PATHWAY][8]['gene'].tolist()
+pathway_genes = pd.read_csv(TRAIT_FH, delimiter='\t')
+pathway_genes = pathway_genes.loc[pathway_genes['go_name'] == PATHWAY, :]
+pathway_genes = pathway_genes['symbol'].tolist()
 
 eqtl_genes = pd.read_csv(EQTL_FH, delimiter='\t')
 eqtl_genes = list(set(eqtl_genes['Gene'].tolist()))

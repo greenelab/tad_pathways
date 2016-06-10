@@ -12,8 +12,7 @@ Output:
 Trait specific .tsv files of one column each indicating all the genes that fall
 in signal TADs
 """
-import sys
-sys.path.insert(1, 'bin/')
+
 from optparse import OptionParser
 import pandas as pd
 import math
