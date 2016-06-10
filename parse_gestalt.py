@@ -9,13 +9,16 @@ specific TAD pathway genes
 Usage:
 Command line 'python parse_gestalt.py -t <TRAIT>'
 
+    -t <TRAIT> is predefined by the manual WebGestalt step (see README)
+    e.g. <TRAIT> is BMD for Bone Mineral Density
+
 Output:
 pickle files with pathway specific dictionaries and summary of pathway p values
 """
 
 from optparse import OptionParser
 import pandas as pd
-import pickle
+import StringIO
 
 ###################
 # Define Functions
@@ -30,70 +33,61 @@ def read_gestalt(fh):
     :param fh: the location of the file to read
 
     Output:
-    Two dictionaries:
-    1) Pathway names as keys, holding enrichment info
-    2) Pathway names as keys, holding p value info
+    1) Pandas Dataframe of entire TRAIT pathways
+    2) Pathway summary text file
     """
 
-    pathway_dict = {}
-    pathway_pvalue = {}
-    pathway_number = 0
-    gene_DataFrame = pd.Series()
-    pathway_name = ''
+    # Read in the entire file as string
     with open(fh, 'r') as trait_fh:
-        # Skip 10 header lines
-        for x in xrange(10):
-            next(trait_fh)
+        gestalt = trait_fh.read()
 
-        for line in trait_fh:
-            line = line.strip('\n').split('\t')
+    # Remove trailing whitespace from file
+    gestalt = gestalt.rstrip()
 
-            # Test the line type and perform different operations accordingly
-            # Skip the line if the first element is blank
-            if len(line[0]) == 0:
-                continue
+    # Triple new lines demarcate pathways, skip header info
+    stanzas = gestalt.split('\n\n\n')[1:]
 
-            # This line has the GO category and pathway name and ID
-            if len(line[0].split(' ')) == 2:
+    # Initialize empty list to append pathway DataFrames
+    stanzas_df = list()
 
-                # Add the pathway to the dictionary
-                if pathway_number > 0:
-                    pathway_dict[pathway_name].append(gene_DataFrame.T)
-                    pathway_pvalue[pathway_name].append(pathway_number)
-                    pathway_number = 0
+    # Loop through each pathway and combine into large DataFrame
+    pathway_names = []
+    pathway_adjp = []
+    pathway_numgenes = []
+    for pathway in stanzas:
+        pathway_file = StringIO.StringIO(pathway)
 
-                pathway_cat = line[0]
-                pathway_name = line[1]
-                pathway_id = line[2]
-                pathway_dict[pathway_name] = [pathway_cat, pathway_id]
-                pathway_pvalue[pathway_name] = []
-                continue
+        # Parse pathway and enrichment information
+        go_info = next(pathway_file).rstrip('\n').split('\t')
+        enrichment = next(pathway_file).rstrip('\n').split(';')
+        go_class = go_info[0]
+        go_name = go_info[1]
+        go_id = go_info[2]
+        adj_p = float(enrichment[5][5:])
 
-            # This line has specific attributes
-            if len(line[0].split(';')) > 1:
-                attributes = line[0].split(';')
-                for attr in attributes:
-                    pathway_dict[pathway_name].append(attr)
-                    if attr.split('=')[0] == 'adjP':
-                        adjp = float(attr.split('=')[1])
-                        pathway_pvalue[pathway_name].append(adjp)
-                continue
+        # Read in the io file
+        pathway_header = ['symbol', 'NA', 'symbol2', 'name', 'entrez_id',
+                          'ensemble_id']
+        pathway_df = pd.read_table(pathway_file, skip_blank_lines=True,
+                                   names=pathway_header)
 
-            # This line has gene info
-            if line[1] == 'NA':
-                gene = pd.Series(line, index=['gene', 'NA', 'symbol', 'descr',
-                                              'entrez', 'ensemble'])
-                if pathway_number == 0:
-                    gene_DataFrame = pd.Series()
+        # Add GO information to the pathway DataFrame
+        pathway_df['go_class'] = go_class
+        pathway_df['go_name'] = go_name
+        pathway_df['go_id'] = go_id
+        pathway_df['adjP'] = adj_p
+        stanzas_df.append(pathway_df)
 
-                gene_DataFrame = pd.concat([gene_DataFrame, gene], axis=1)
-                pathway_number += 1
+        # Add to general information
+        pathway_names.append(go_name)
+        pathway_adjp.append(adj_p)
+        pathway_numgenes.append(pathway_df.shape[0])
 
-        # Add the final pathway outside the for loop
-        pathway_dict[pathway_name].append(gene_DataFrame.T)
-        pathway_pvalue[pathway_name].append(pathway_number)
+    return_df = pd.concat(stanzas_df)
+    gen_info = pd.DataFrame([pathway_names, pathway_adjp, pathway_numgenes]).T
+    gen_info.columns = ['name', 'adjP', 'num_genes']
 
-    return pathway_dict, pathway_pvalue
+    return return_df, gen_info
 
 # Run the command if called by name
 if __name__ == '__main__':
@@ -110,7 +104,7 @@ if __name__ == '__main__':
     ####################################
     TRAIT = options.trait
     TRAIT_FH = 'data/gestalt/' + TRAIT + '_gestalt.tsv'
-    OUT_FH = 'data/gestalt/' + TRAIT + '_pathways.p'
+    OUT_TRAIT_FH = 'data/gestalt/' + TRAIT + '_complete_gestalt.tsv'
     OUT_P_FH = 'data/gestalt/' + TRAIT + '_pvalues.tsv'
 
     ####################################
@@ -118,11 +112,8 @@ if __name__ == '__main__':
     ####################################
     gestalt_data, gestalt_p = read_gestalt(TRAIT_FH)
 
-    # Save pickle file for pathway lookup
-    pickle.dump(gestalt_data, open(OUT_FH, 'wb'))
-
-    # Process p value data and output to tsv
-    gestalt_p = pd.DataFrame.from_dict(gestalt_p, orient='index')
-    gestalt_p.columns = ['adjP', 'num_genes']
+    # Write files
+    gestalt_data = gestalt_data.sort_values(by='adjP')
+    gestalt_data.to_csv(OUT_TRAIT_FH, sep='\t')
     gestalt_p = gestalt_p.sort_values(by='adjP')
     gestalt_p.to_csv(OUT_P_FH, sep='\t')

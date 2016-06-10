@@ -53,8 +53,12 @@ pathway analysis on the gene lists for the above traits.
 * Significance Level *Top10*
 * Minimum Number of Genes for a Category *4*
 
-Note - The output of ANALYSIS.sh in *data/TAD_based_genes* for all traits is
+Note - The output of ANALYSIS.sh in *data/TAD_based_genes/* for all traits is
 ready for TAD Pathway Analysis.
+
+After performing the WebGestalt analysis, click `Export TSV Only` and save the
+file in *data/gestalt/<TRAIT>_gestalt.tsv* where *<TRAIT>* is BMD and T2D for
+Bone Mineral Density and Type 2 Diabetes, respectively.
 
 #######################
 # GWAS/eQTL INTEGRATION

@@ -116,8 +116,6 @@ def split_TAD_bins(tadlength, num_bins):
     a list of tuples with the locations for starting and ending bins
     """
 
-    import random
-
     avgbin = tadlength / num_bins
     remainder = tadlength % num_bins
     if remainder > 0:
@@ -182,11 +180,11 @@ for chrom in TADdictgenes.keys():
 ####################################
 # Plot
 ####################################
-gc_distribution = pd.DataFrame(gc_distribution)
+gc_distrib = pd.DataFrame(gc_distribution)
 
 fig, ax = plt.subplots()
-gc_distribution.boxplot(column=range(0, 50), notch=True, positions=range(0, 50),
-                        return_type='dict')
+gc_distrib.boxplot(column=range(0, 50), notch=True, positions=range(0, 50),
+                   return_type='dict')
 ax.set_xticklabels('' * NUM_BINS)
 ax.tick_params(axis=u'both', which=u'both', length=0)
 ax.spines['right'].set_visible(False)

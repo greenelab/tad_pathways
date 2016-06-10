@@ -11,8 +11,6 @@
 # Output:
 # Venn diagrams of disease specific evidence overlaps
 
-library(VennDiagram)
-
 # Load in command arguments
 args <- commandArgs(trailingOnly = T)
 
@@ -57,12 +55,11 @@ for (gene in 1:nrow(evidence_genes)) {
 venn_list <- list('eQTL' = eqtl_genes, 'GWAS' = gwas_genes, 'TAD Pathway' = tad_genes)
 
 # Output Venn Diagram
-venn.diagram(x = venn_list,
-             filename = VENN_FH,
-             fill = c("red", "blue", "yellow"),
-             height = 1500,
-             width = 1500,
-             euler.d = F,
-             scaled = F,
-             imagetype = 'png')
-
+VennDiagram::venn.diagram(x = venn_list,
+                          filename = VENN_FH,
+                          fill = c("red", "blue", "yellow"),
+                          height = 1500,
+                          width = 1500,
+                          euler.d = F,
+                          scaled = F,
+                          imagetype = 'png')
