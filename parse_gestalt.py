@@ -48,7 +48,7 @@ def read_gestalt(fh):
     stanzas = gestalt.split('\n\n\n')[1:]
 
     # Initialize empty list to append pathway DataFrames
-    stanzas_df = list()
+    stanzas_df_list = list()
 
     # Loop through each pathway and combine into large DataFrame
     pathway_names = []
@@ -60,32 +60,33 @@ def read_gestalt(fh):
         # Parse pathway and enrichment information
         go_info = next(pathway_file).rstrip('\n').split('\t')
         enrichment = next(pathway_file).rstrip('\n').split(';')
-        go_class = go_info[0]
-        go_name = go_info[1]
-        go_id = go_info[2]
+        go_class, go_name, go_id = go_info
         adj_p = float(enrichment[5][5:])
 
         # Read in the io file
-        pathway_header = ['symbol', 'NA', 'symbol2', 'name', 'entrez_id',
-                          'ensemble_id']
+        pathway_header = ['symbol', 'name', 'entrez_id', 'ensemble_id']
         pathway_df = pd.read_table(pathway_file, skip_blank_lines=True,
-                                   names=pathway_header)
+                                   names=pathway_header,
+                                   usecols=[0, 3, 4, 5])
 
         # Add GO information to the pathway DataFrame
         pathway_df['go_class'] = go_class
         pathway_df['go_name'] = go_name
         pathway_df['go_id'] = go_id
         pathway_df['adjP'] = adj_p
-        stanzas_df.append(pathway_df)
+        stanzas_df_list.append(pathway_df)
 
         # Add to general information
         pathway_names.append(go_name)
         pathway_adjp.append(adj_p)
         pathway_numgenes.append(pathway_df.shape[0])
 
-    return_df = pd.concat(stanzas_df)
-    gen_info = pd.DataFrame([pathway_names, pathway_adjp, pathway_numgenes]).T
-    gen_info.columns = ['name', 'adjP', 'num_genes']
+    return_df = pd.concat(stanzas_df_list)
+    return_df = return_df.sort_values(by='adjP')
+    gen_info = return_df.groupby(['go_id', 'go_name',
+                                  'adjP']).symbol.count().reset_index()
+    gen_info.rename(columns={'symbol': 'num_genes'}, inplace=True)
+    gen_info = gen_info.sort_values(by='adjP')
 
     return return_df, gen_info
 
@@ -113,7 +114,5 @@ if __name__ == '__main__':
     gestalt_data, gestalt_p = read_gestalt(TRAIT_FH)
 
     # Write files
-    gestalt_data = gestalt_data.sort_values(by='adjP')
-    gestalt_data.to_csv(OUT_TRAIT_FH, sep='\t')
-    gestalt_p = gestalt_p.sort_values(by='adjP')
-    gestalt_p.to_csv(OUT_P_FH, sep='\t')
+    gestalt_data.to_csv(OUT_TRAIT_FH, sep='\t', index=False)
+    gestalt_p.to_csv(OUT_P_FH, sep='\t', index=False)

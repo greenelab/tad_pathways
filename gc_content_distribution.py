@@ -166,14 +166,12 @@ for chrom in TADdictgenes.keys():
 
         # Now, loop over the TAD bins and extract GC Content
         tad_gc = []
-        coord_idx = 0
 
-        for coord in tad_bins:
+        for coord_idx, coord in enumerate(tad_bins):
             start = tad_bins[coord_idx][0]
             end = tad_bins[coord_idx][1]
             gc = determine_gc_content(tad_sequence, start, end)
             tad_gc.append(gc)
-            coord_idx += 1
 
         gc_distribution.append(tad_gc)
 

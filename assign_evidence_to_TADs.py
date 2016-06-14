@@ -57,14 +57,14 @@ def buildTADkey(gwas_snp):
     gwas_snp - a single row subset of the TAD-GWAS input file
 
     output - The lookup info in the TAD gene dictionary
-    i.e. [Chromosome, TAD_ID:TAD_Start-TAD_End]
+    i.e. [(hromosome, TAD_ID:TAD_Start-TAD_End)
     """
     chrom = gwas_snp['chrom'][3:]
     start = int(gwas_snp['TADStart'])
     end = int(gwas_snp['TADEnd'])
     tad_num = int(gwas_snp['TADidx'])
     output = str(tad_num) + ':' + str(start) + '-' + str(end)
-    return [str(chrom), output]
+    return (str(chrom), output)
 
 
 def parse_ev_key(tadkey):
@@ -103,7 +103,7 @@ for tadix in range(len(TADGWAS)):
         FullTADinfo = TADdictgenes[chrom][TADkey]
 
         # Build evidence key
-        e_key = 'chr' + str(chrom) + ':' + TADkey
+        e_key = 'chr{}:{}'.format(chrom, TADkey)
 
         if e_key not in evidence_dict.keys():
             evidence_dict[e_key] = []
@@ -134,15 +134,10 @@ with open(OUT_FH, 'w') as out_fh:
     out_fh.write('ID\tCHROMOSOME\tSTART\tEND\tUCSC\tGENE\tEVIDENCE\n')
     for tadkey in evidence_dict.keys():
         info = parse_ev_key(tadkey)
-        ID = info[0]
-        chrom = info[1]
-        start = info[2]
-        end = info[3]
-        ucsc = info[4]
+        ID, chrom, start, end, ucsc = info
         loop_idx = 0
         for evidence in evidence_dict[tadkey][0]:
-            gene = evidence[0]
-            e = evidence[1]
+            gene, e = evidence
             if loop_idx == 0:
                 out_fh.write('\t'.join([ID, chrom, start, end, ucsc,
                                         gene, e]) + '\n')
