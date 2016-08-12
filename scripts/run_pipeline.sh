@@ -10,43 +10,41 @@
 ##############################
 # PART 1: Download Data
 ##############################
-# Download 1000G Phase III data, hg19 Gencode genes, NHGRI-EBI GWAS Catalog,
-# and hESC TAD domain boundaries for human and mouse genome
-sh scripts/data/download_data_hg.sh
-sh scripts/data/download_data_mm.sh
+# Download human and mouse genome data
+python scripts/download/download_hg.py
+python scripts/download/download_mm.py
 
 ##############################
 # PART 2: Process Data
 ##############################
 # Extract common SNPs from 1000 Genomes and mouse genome 
-python generate_common-snps.py -g 'hg'
-python generate_common-snps.py -g 'mm'
+python scripts/generate_common-snps.py --genome 'hg'
+python scripts/generate_common-snps.py --genome 'mm'
 
-# Generate index files (maps to TAD identifiers to enable fast lookup)
-# 1000G SNP / genes / repeat elements
-python generate_index_files.py -t 'hESC'
-python generate_index_files.py -t 'IMR90'
-python generate_index_files.py -t 'mESC'
-python generate_index_files.py -t 'cortex'
+# Generate index files mapping 1000G SNPs, genes, and repeat elements
+python scripts/generate_index_files.py --TAD-Boundary 'hESC'
+python scripts/generate_index_files.py --TAD-Boundary 'IMR90'
+python scripts/generate_index_files.py --TAD-Boundary 'mESC'
+python scripts/generate_index_files.py --TAD-Boundary 'cortex'
 
 ##############################
 # PART 3: Visualize SNPs and Genes in TADs
 ##############################
 # Output histograms and line graphs of SNP/Gene/Repeat locations in TADs
 # and gc content distribution across human and mouse tads
-sh scripts/viz/visualize.sh
+sh scripts/tad_util/viz/visualize.sh
 
 ##############################
 # PART 4: TAD Pathway Analysis
 ##############################
 # Convert human GWAS catalog to hg19
-python scripts/bin/convert_GWAS_catalog_hg19.py
+python scripts/convert_GWAS_catalog_hg19.py
 
 # Extract data from NHGRI-EBI GWAS catalog
 Rscript scripts/NHGRI-EBI_GWAS_summary.R
 
 # Extract TAD based genes
-python scripts/build_TAD_genelists.py -T 'hESC'
+python scripts/build_TAD_genelists.py --TAD-Boundary 'hESC'
 
 # ----------------------------
 # Manual Step - WebGestalt Analysis
@@ -58,7 +56,7 @@ python scripts/build_TAD_genelists.py -T 'hESC'
 # Click 'Export TSV Only' and save as 'data/gestalt/BMD_gestalt.tsv'
 
 # Process WebGestalt Parameters for BMD and T2D
-python scripts/parse_gestalt.py -t BMD
+python scripts/parse_gestalt.py --trait BMD
 
 ##############################
 # PART 5: Download eQTL data for trait of interest
@@ -72,16 +70,16 @@ python scripts/parse_gestalt.py -t BMD
 ##############################
 # Output evidence tables
 python scripts/construct_evidence.py \
-        --trait BMD \
-        --eqtl data/eqtl/eqtl_BMD_genelist.tsv \
-        --genelist data/gwas_based_genes/Bone_mineral_density_hg19_SNPs_GWAS_genelists.tsv \
-        --pathway 'skeletal system development'
+--trait BMD \
+--eqtl data/eqtl/eqtl_BMD_genelist.tsv \
+--gwas data/gwas_based_genes/Bone_mineral_density_hg19_SNPs_GWAS_genelists.tsv \
+--pathway 'skeletal system development'
 
 # Summarize GWAS/eQTL/TAD evidence
 python scripts/assign_evidence_to_TADs.py \
-        --evidence tad_pathway/BMD_gene_evidence.csv \
-        --snps data/gwas_TAD_location/Bone_mineral_density_hg19_SNPs.tsv \
-        --output-file tad_pathway/BMD_evidence_summary.tsv
+--evidence-fh tad_pathway/BMD_gene_evidence.csv \
+--tad-snp-path data/gwas_TAD_location/Bone_mineral_density_hg19_SNPs.tsv \
+--output-fh tad_pathway/BMD_evidence_summary.tsv
 
 # Output venn diagrams and gene lists for both traits
 R --no-save --args tad_pathway/BMD_gene_evidence.csv \
