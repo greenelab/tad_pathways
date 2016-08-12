@@ -1,0 +1,60 @@
+# Download Mouse Data
+
+# The script will retreive mouse data used in the TAD pathways pipeline
+
+# 1. Mouse Genome Project SNPs (v2)
+# 2. mm9 Gencode Genes
+# 3. RepeatMasker mm9 repeat elements
+# 4. TAD Domain Boundaries (mESC and Cortex)
+# 5. mm9 sequence
+
+import os
+from urllib.request import urlretrieve
+
+
+# Check if file is already downloaded, and download if not
+def download_file(base_url, fh, download_dir):
+    path = os.path.join(download_dir, fh)
+    if not (os.path.exists(path)):
+        urlretrieve(base_url + fh, path)
+
+# Make new folder if it doesn't exist already
+download_folder = 'data/mm/'
+if not (os.path.exists(download_folder)):
+    os.makedirs(download_folder)
+
+# 1. Mouse Genome Project SNPs v2
+base_url = 'ftp://ftp-mouse.sanger.ac.uk/REL-1211-SNPs_Indels/'
+fh = 'mgp.v2.snps.annot.reformat.vcf.gz'
+download_file(base_url, fh, download_folder)
+
+# 2. Gencode Mouse
+base_url = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/'
+fh = 'gencode.vM9.annotation.gtf.gz'
+download_file(base_url, fh, download_folder)
+
+# 3. RepeatMasker mm9 Repeat Elements
+base_url = 'http://www.repeatmasker.org/genomes/mm9/RepeatMasker-rm328' \
+           '-db20090604/'
+fh = 'mm9.fa.out.gz'
+download_file(base_url, fh, download_folder)
+
+# 4. TAD Domain Boundaries
+base_url = 'http://chromosome.sdsc.edu/mouse/hi-c/'
+mESC = 'mESC.domain.tar.gz'
+cortex = 'cortex.domain.tar.gz'
+download_file(base_url, mESC, download_folder)
+download_file(base_url, cortex, download_folder)
+
+# 5. mm9 Full Sequence
+mm9_download_folder = 'data/mm/mm9_fasta/'
+base_url = 'http://hgdownload.cse.ucsc.edu/goldenPath/mm9/chromosomes/'
+
+# Create download directory
+if not os.path.exists(mm9_download_folder):
+    os.makedirs(mm9_download_folder)
+
+# Download chromosome sequences
+for chrom in list(range(1, 20)) + ['X', 'Y']:
+    fh = 'chr{}.fa.gz'.format(chrom)
+    download_file(base_url, fh, mm9_download_folder)
