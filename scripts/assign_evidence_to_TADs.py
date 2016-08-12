@@ -15,7 +15,6 @@ in signal TADs
 
 from optparse import OptionParser
 import pandas as pd
-import csv
 import math
 
 ####################################
@@ -132,9 +131,7 @@ for tadix in range(len(TADGWAS)):
 # Write out results to file
 ####################################
 with open(OUT_FH, 'w') as out_fh:
-    tadwriter = csv.writer(out_fh, delimiter='\t')
-    tadwriter.writerow(('ID', 'CHROMOSOME', 'START', 'END', 'UCSC', 'GENE',
-                        'EVIDENCE'))
+    out_fh.write('ID\tCHROMOSOME\tSTART\tEND\tUCSC\tGENE\tEVIDENCE\n')
     for tadkey in evidence_dict.keys():
         info = parse_ev_key(tadkey)
         ID, chrom, start, end, ucsc = info
@@ -142,7 +139,8 @@ with open(OUT_FH, 'w') as out_fh:
         for evidence in evidence_dict[tadkey][0]:
             gene, e = evidence
             if loop_idx == 0:
-                tadwriter.writerow((ID, chrom, start, end, ucsc, gene, e))
+                out_fh.write('\t'.join([ID, chrom, start, end, ucsc,
+                                        gene, e]) + '\n')
             else:
-                tadwriter.writerow([None] * 5 + [gene, e])
+                out_fh.write('\t\t\t\t\t' + gene + '\t' + e + '\n')
             loop_idx += 1
