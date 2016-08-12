@@ -1,97 +1,84 @@
-############################################
 # Incorporating TADs into GWAS Analysis - TAD Pathways
-(C) 2016 Gregory Way
-############################################
 
-#######################
-# SUMMARY
-#######################
+**(C) 2016 Gregory Way**
+
+## Summary
+
 The repository contains methods for manipulating, observing, and visualizing
 topologically associating domains (TADs) in the context of 1000 Genomes Phase
-III data, and hg19 Gencode genes. The repository also proposes methods and tools
-for the incorporation of TAD domains into the prioritization of GWAS signals
-through the investigation of publicly available GWAS data. We introduce TAD
-pathways as a method to identify the likely causal genes from GWAS independent
-of distance to sentinel SNP.
+III data, hg19 Gencode genes, and repeat elements. The repository also
+proposes methods and tools for the incorporation of TAD domains into the
+prioritization of GWAS signals through the investigation of publicly available
+GWAS data. We introduce TAD pathways as a method to identify the likely causal
+genes from GWAS independent of distance to sentinel SNP.
 
-#######################
-# CONTACT
-#######################
-For all questions and bug reporting:
-GregWay@mail.med.upenn.edu
+## Contact
 
-#######################
-# USAGE
-#######################
-Curate GWAS catalog and TAD boundaries to generate TAD based gene lists 
-~~~~~~~~~~~~~~~~~~
+For all questions and bug reporting please file
+[GitHub issues](https://github.com/greenelab/tad_pathways/issues)
+
+## Usage
+
+Curate GWAS catalog and TAD boundaries to generate TAD based gene lists
+
+```sh
 ./ANALYSIS.sh
-~~~~~~~~~~~~~~~~~~
-Downloads data, performs analyses, and outputs several figures.
+```
 
-#######################
-# TAD PATHWAY
-#######################
+This will download data, perform analyses, and output several figures.
+
+## Tad Pathways
+
 The above command outputs TAD based genes for signal found in 299 different GWAS
 traits. As a case study to demonstrate the utility of a TAD based approach,
-input the TAD based gene lists for the following two diseases into pathway
-analysis:
+input the TAD based gene list for the Bone Mineral Density (1,297 genes) into a
+pathway analysis:
 
-* Bone Mineral Density (1,297 genes for TAD pathway)
-* Type 2 Diabetes (1,567 genes)
+Next, run a
+[WebGestalt](http://bioinfo.vanderbilt.edu/webgestalt/ "Pathway Analysis")
+pathway analysis on the gene list.
 
-Run a [WebGestalt](http://bioinfo.vanderbilt.edu/webgestalt/ "Pathway Analysis")
-pathway analysis on the gene lists for the above traits.
+### WebGestalt Parameters
 
-# WebGestalt Parameters
-* Select gene ID type *hsapiens__gene_symbol*
-* Enrichment Analysis *GO Analysis*
-* GO Slim Classification *Yes*
-* Reference Set *hsapiens__genome*
-* Statistical Method *Hypergeometric*
-* Multiple Test Adjustment *BH*
-* Significance Level *Top10*
-* Minimum Number of Genes for a Category *4*
+| Parameter | Input |
+| --------- | ----- |
+| Select gene ID type | *hsapiens__gene_symbol* |
+| Enrichment Analysis | *GO Analysis* |
+| GO Slim Classification | Yes |
+| Reference Set | *hsapiens__genome* |
+| Statistical Method | *Hypergeometric* |
+| Multiple Test Adjustment | *BH* |
+| Significance Level | *Top10* |
+| Minimum Number of Genes for a Category | *4*
 
-Note - The output of ANALYSIS.sh in *data/TAD_based_genes/* for all traits is
+Note - The output of `ANALYSIS.sh` in *data/TAD_based_genes/* for all traits is
 ready for TAD Pathway Analysis.
 
 After performing the WebGestalt analysis, click `Export TSV Only` and save the
-file in *data/gestalt/<TRAIT>_gestalt.tsv* where *<TRAIT>* is BMD and T2D for
-Bone Mineral Density and Type 2 Diabetes, respectively.
+file in `data/gestalt/<TRAIT>_gestalt.tsv` where `<TRAIT>` is "BMD" for the example.
 
-#######################
-# GWAS/eQTL INTEGRATION
-#######################
-# Data Access  (see download_data.sh for more details)
+## GWAS/eQTL Integration
+
+### Data Access  (see `download_data.sh` for more details)
+
 * GWAS Catalog (2016-02-25)
-* eQTL (2016-05-09) [eQTL Browser](http://www.ncbi.nlm.nih.gov/projects/gap/eqtl/index.cgi, "eQTL")
+* eQTL (2016-05-09)
+[eQTL Browser](http://www.ncbi.nlm.nih.gov/projects/gap/eqtl/index.cgi "eQTL")
 
-# Nearest gene GWAS reports
+### Nearest gene GWAS reports
+
 * [Bone Mineral Density](http://www.ncbi.nlm.nih.gov/pubmed/22504420 "BMD")
-* [Type 2 Diabetes](http://www.ncbi.nlm.nih.gov/pubmed/22885922 "T2D")
 
-# eQTL Browser Parameters
+### eQTL Browser Parameters
+
 * Analysis ID (All)
 * Association Test Significance Filters (p-value 1 x 10^-1)
-* Phenotype Traits  (*Bone mineral density*, *Inflammatory bowel disease*)
+* Phenotype Traits  (*Bone Mineral Density*)
 
-#######################
-# DEPENDENCIES
-#######################
-# Python 2.7.6
-* pandas (0.17.1)
-* vcf (0.6.7)
-* scipy (0.14.0)
-* scikit-learn (0.16.1)
-* pyliftover (0.3)
-* biopython (1.66)
+## Dependencies
 
-# R 3.3.0
-* readr (0.2.2)
-* VennDiagram (1.6.17)
-
-# Linux (Ubuntu 14.04)
-* bcftools (1.3)
-* vcftools (0.1.11)
+All analyses were performed in the Anaconda python distribution (3.5.1). For
+specific package versions please refer to `environment.yml`. R version 3.3.0 was
+used for visualization. For more specific environment dependencies refer to our
+accompanying docker file at `docker/Dockerfile`
 
