@@ -11,14 +11,7 @@
 # 7. The Full hg19 Sequence
 
 import os
-from urllib.request import urlretrieve
-
-
-# Check if file is already downloaded, and download if not
-def download_file(base_url, fh, download_dir):
-    path = os.path.join(download_dir, fh)
-    if not (os.path.exists(path)):
-        urlretrieve(base_url + fh, path)
+from download_util import download_file
 
 # Make new folder if it doesn't exist already
 download_folder = 'data/hg/'
