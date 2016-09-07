@@ -3,7 +3,7 @@
 ##############################
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TAD Pathways - Analytical code for TAD based analysis and visualization
-# (C) 2016 Gregory Way
+# 2016 Gregory Way
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##############################
 
@@ -12,22 +12,22 @@
 ##############################
 # Download 1000G Phase III data, hg19 Gencode genes, NHGRI-EBI GWAS Catalog,
 # and hESC TAD domain boundaries for human and mouse genome
-sh scripts/data/download_data_hg.sh
-sh scripts/data/download_data_mm.sh
+python scripts/download/download_hg.py
+python scripts/download/download_mm.py
 
 ##############################
 # PART 2: Process Data
 ##############################
 # Extract common SNPs from 1000 Genomes and mouse genome 
-python generate_common-snps.py -g 'hg'
-python generate_common-snps.py -g 'mm'
+python generate_common-snps.py --genome 'hg'
+python generate_common-snps.py --genome 'mm'
 
 # Generate index files (maps to TAD identifiers to enable fast lookup)
 # 1000G SNP / genes / repeat elements
-python generate_index_files.py -t 'hESC'
-python generate_index_files.py -t 'IMR90'
-python generate_index_files.py -t 'mESC'
-python generate_index_files.py -t 'cortex'
+python generate_index_files.py --TAD-Boundary 'hESC'
+python generate_index_files.py --TAD-Boundary 'IMR90'
+python generate_index_files.py --TAD-Boundary 'mESC'
+python generate_index_files.py --TAD-Boundary 'cortex'
 
 ##############################
 # PART 3: Visualize SNPs and Genes in TADs

@@ -9,9 +9,10 @@
 # 5. mm9 sequence
 
 import os
-from download_util import download_file
+from download_util import download_file, process_repeats
 
 # Make new folder if it doesn't exist already
+genome = 'mm'
 download_folder = 'data/mm/'
 if not (os.path.exists(download_folder)):
     os.makedirs(download_folder)
@@ -31,6 +32,7 @@ base_url = 'http://www.repeatmasker.org/genomes/mm9/RepeatMasker-rm328' \
            '-db20090604/'
 fh = 'mm9.fa.out.gz'
 download_file(base_url, fh, download_folder)
+process_repeats(download_folder, fh, genome)
 
 # 4. TAD Domain Boundaries
 base_url = 'http://chromosome.sdsc.edu/mouse/hi-c/'
@@ -38,6 +40,7 @@ mESC = 'mESC.domain.tar.gz'
 cortex = 'cortex.domain.tar.gz'
 download_file(base_url, mESC, download_folder)
 download_file(base_url, cortex, download_folder)
+# TODO - process these domain files (extract and take combined)
 
 # 5. mm9 Full Sequence
 mm9_download_folder = 'data/mm/mm9_fasta/'

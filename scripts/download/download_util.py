@@ -1,5 +1,6 @@
 # Download file utility
 
+
 def download_file(base_url, fh, download_dir):
     """
     Check if file is already downloaded, and download if not
@@ -18,3 +19,17 @@ def download_file(base_url, fh, download_dir):
     path = os.path.join(download_dir, fh)
     if not (os.path.exists(path)):
         urlretrieve(base_url + fh, path)
+
+
+def process_repeats(base_dir, fh, genome):
+    """
+    Process the irregularly structured repeatmasker file
+    """
+    from subprocess import call
+
+    full_loc = base_dir + fh
+    call(['gunzip', full_loc])
+
+    # Replace variable length space delimiters with tabs and output tsv file
+    CMD = "sed 's/ \+/\\t/g' " + full_loc[:-3] + " > " + full_loc[:-3] + ".tsv"
+    call(CMD, shell=True)

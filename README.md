@@ -1,7 +1,5 @@
 # Incorporating TADs into GWAS Analysis - TAD Pathways
 
-**(C) 2016 Gregory Way**
-
 ## Summary
 
 The repository contains methods for manipulating, observing, and visualizing

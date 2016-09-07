@@ -11,10 +11,11 @@
 # 7. The Full hg19 Sequence
 
 import os
-from download_util import download_file
+from download_util import download_file, process_repeats
 
 # Make new folder if it doesn't exist already
-download_folder = 'data/hg/'
+genome = 'hg'
+download_folder = 'data/' + genome + '/'
 if not (os.path.exists(download_folder)):
     os.makedirs(download_folder)
 
@@ -49,6 +50,7 @@ base_url = 'http://www.repeatmasker.org/genomes/hg19/RepeatMasker-rm405-' \
            'db20140131/'
 fh = 'hg19.fa.out.gz'
 download_file(base_url, fh, download_folder)
+process_repeats(download_folder, fh, genome)
 
 # 4. The NHGRI-EBI GWAS Catalog
 # GWAS Catalog downloaded on February 25th, 2016

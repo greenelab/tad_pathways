@@ -17,7 +17,7 @@ See specific functions
 ##############################
 
 
-def initialize_TAD_dictionary(TAD_LOC):
+def load_tad(TAD_LOC):
     """
     Parameters:
     TAD_LOC: the location of the TAD boundary coordinate file
@@ -27,34 +27,13 @@ def initialize_TAD_dictionary(TAD_LOC):
     is 'TAD_ID:TADstart-TADend'.
     """
 
-    import csv
+    import pandas as pd
 
-    TADdict = {}
-    TAD_idx = 0  # Will become the TAD based ID
-    with open(TAD_LOC) as tadfile:
-        tadreader = csv.reader(tadfile, delimiter='\t')
-        for row in tadreader:
-            # Build the name for the 1st key
-            chrom = row[0][3:]
+    snp_header = ['chromosome', 'start', 'end']
+    TAD_df = pd.read_table(TAD_LOC, names=snp_header)
+    TAD_df['chromosome'] = TAD_df['chromosome'].map(lambda x: x[3:])
 
-            # Initialize a dictionary with chromosome key
-            if chrom not in TADdict:
-                TADdict[str(chrom)] = {}
-
-            # Build the name for the 2nd key
-            TADStart = str(row[1])
-            TADEnd = str(row[2])
-            TADkey = str(TAD_idx) + ':' + TADStart + '-' + TADEnd
-            TADdict[str(chrom)][TADkey] = []
-            TAD_idx += 1
-
-    # Add a place to store SNPs that fall in TAD boundaries
-    TADdict['Boundary'] = []
-
-    # Add Y chromosome
-    TADdict['Y'] = []
-
-    return TADdict
+    return TAD_df
 
 
 def parse_TAD_name(tad_name):
@@ -74,22 +53,24 @@ def parse_TAD_name(tad_name):
 def parse_gene_gtf(gene_info):
     """
     Parameters:
-    gene_info - a row from the input gtf file. File format is described here:
-    "useast.ensemble.org/info/website/upload/gff.html?redirect=no"
+    gene_info - a row from the input gtf file.
 
     Output:
-    Parsed gene information from the gtf file with the format:
-    [gene_name, gene_type, chromosome, gene_start, gene_end, strand]
+    Parsed gene information from the gtf file [gene_type, gene_name]
     """
-    chrom = gene_info[0][3:]
-    l_start = gene_info[3]
-    l_end = gene_info[4]
-    strand = gene_info[6]
-    gene_info = str(gene_info[8])  # The 8th value has ';' separated attributes
-    attrb = gene_info.split(';')
-    gene_name = attrb[4].split(' ')[2].strip('"')
-    gene_type = attrb[2].split(' ')[2].strip('"')
-    return (gene_name, gene_type, str(chrom), int(l_start), int(l_end), strand)
+
+    import pandas as pd
+
+    info = gene_info['info'].split(';')
+    build_info = {}
+    for attrb in range(1, (len(info) - 1)):
+        attrb_s = info[attrb].split(' ')
+        attrb_name = attrb_s[1].strip('"')
+        new_attrb = attrb_s[2].strip('"')
+        build_info[attrb_name] = new_attrb
+    return_list = [build_info['gene_type'], build_info['gene_name']]
+
+    return pd.Series(return_list)
 
 
 def parse_SNP_position(snp_info):

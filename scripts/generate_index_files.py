@@ -1,264 +1,187 @@
 """
-(C) 2016 Gregory Way
-generate_index_files.py
+2016 Gregory Way
+scripts/generate_index_files.py
 
 Description:
-1) Map GWAS SNP information to TADs based on genomic locations. We are
-considering the GRCh37/hg19 genome build for both SNP positions/TAD locations
-respectively.
+Generates index files mapping genomic content to TADs enabling quick lookup
 
-2) Map reference genes to TADs based on genomic locations. For this iteration we
-are considering the hg19 assembly.
-
-3) Map repeatmasker elements to TADs based on genomic locations (hg19)
+1) SNPs
+2) Genes
+3) Repetitive Elements
 
 Usage:
-Is called by 'ANALYSIS.sh'
+Is called by 'scripts/run_pipeline.sh':
+
+      python scripts/generate_index_files.py --TAD-Boundary 'hESC'
+
+Where the options for the -t flag are: "hESC", "IMR90", "mESC", or "cortex"
 
 Output:
-The script will output a pickle file that will store a python dictionary to
-enable fast lookups of SNP/gene/repeat information as they fall in TADs
+3 gzipped tsv index files and a tsv file of all genes that span TAD boundaries
 """
 
-import sys
-sys.path.insert(1, 'bin/')
-from util import initialize_TAD_dictionary
-from util import parse_TAD_name
-from util import parse_gene_gtf
+import argparse
 import pandas as pd
-import pickle
-import csv
+from tad_util.util import load_tad, parse_gene_gtf
+
+pd.options.mode.chained_assignment = None
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-t', '--TAD-Boundary', help='boundary cell type. The'
+                    'options can be "hESC", "IMR90", "mESC", or "cortex"')
+args = parser.parse_args()
+
+TAD_CELL = args.TAD_Boundary
+
+if TAD_CELL in ['hESC', 'IMR90']:
+    BASE_DIR = 'data/hg/'
+    GENOME = 'hg19'
+    REF_GENE_GTF = BASE_DIR + 'gencode.v19.annotation.gtf.gz'
+    TAD_LOC = BASE_DIR + TAD_CELL + '_domains_hg19.bed'
+    REF_SNPS = BASE_DIR + 'hg_common-snps.tsv'
+elif TAD_CELL in ['mESC', 'cortex']:
+    BASE_DIR = 'data/mm/'
+    GENOME = 'mm9'
+    REF_GENE_GTF = BASE_DIR + 'gencode.vM9.annotation.gtf.gz'
+    TAD_LOC = BASE_DIR + TAD_CELL + '_domains_mm9.bed'
+    REF_SNPS = BASE_DIR + 'mm_common-snps.tsv'
+else:
+    raise ValueError('Please input either "hESC", "IMR90", "mESC", or '
+                     '"cortex"')
+
+REPEAT_FH = BASE_DIR + GENOME + '.fa.out.tsv'
+
+SNP_INDEX = 'index/SNP_index_' + GENOME + '_' + TAD_CELL + '.tsv.bz2'
+GENE_INDEX = 'index/GENE_index_' + GENOME + '_' + TAD_CELL + '.tsv.bz2'
+REPEAT_INDEX = 'index/REPEATS_index_' + GENOME + '_' + TAD_CELL + '.tsv.bz2'
+SPANNED_GENES_FH = 'tables/SpannedGenesAcross_' + TAD_CELL + '_TADs.tsv'
+
+
+def curate_tad_elements(tad_df, input_df, gen_class):
+    """
+    Loop through TAD boundaries to assign genomic elements to TADs
+
+    Arguments:
+    :param tad_df: pandas dataframe, TAD boundary locations
+    :param input_df: pandas dataframe, the genomic content to subset
+    :param gen_class: str, either 'snp', 'gene', or 'repeat'
+
+    Output:
+    Large summary dataframes of the TAD assignment for input genomic element
+    """
+
+    big_out_df = pd.DataFrame()
+    bnd_df = pd.DataFrame()
+
+    if gen_class in ['gene', 'repeat']:
+        input_df['chromosome'] = input_df['chromosome'].map(lambda x: x[3:])
+
+    for tad in tad_df.itertuples():
+        tad_id, chrom, start, end = list(tad)
+        start, end = int(start), int(end)
+
+        if gen_class == 'snp' and chrom != 'X':
+            chrom = int(chrom)
+
+        chm_sub_df = input_df[input_df['chromosome'] == chrom]
+
+        if gen_class == 'snp':
+            elem_sub_df = chm_sub_df[(chm_sub_df['position'] >= start) &
+                                     (chm_sub_df['position'] < end)]
+        else:
+            elem_sub_df = chm_sub_df[(chm_sub_df['start'] >= start) &
+                                     (chm_sub_df['stop'] <= end)]
+
+            # Get the overlapping genomic elements
+            o_df = chm_sub_df[((chm_sub_df['start'] >= start) &
+                              (chm_sub_df['start'] < end) &
+                              (chm_sub_df['stop'] > end)) |
+                              ((chm_sub_df['stop'] >= start) &
+                              (chm_sub_df['stop'] < end) &
+                              (chm_sub_df['start'] < start))]
+
+            elem_sub_df = pd.concat([elem_sub_df, o_df], axis=0,
+                                    ignore_index=True)
+            bnd_df = bnd_df.append(o_df, ignore_index=True)
+
+        # Assign TAD information
+        elem_sub_df['TAD_id'] = tad_id
+        elem_sub_df['TAD_start'] = start
+        elem_sub_df['TAD_end'] = end
+
+        big_out_df = big_out_df.append(elem_sub_df, ignore_index=True)
+
+    if gen_class in ['gene', 'repeat']:
+        bnd_df = bnd_df.drop_duplicates()
+
+    return big_out_df, bnd_df
+
+
+# For parsing messy repeat info data
+def rm_paren(x): return x.strip('(').strip(')')
+
+# Read in TAD boundary file
+tad_df = load_tad(TAD_LOC)
 
 ####################################
-# Load Constants
+# PART 1 - SNPs
 ####################################
-TAD_LOC = 'data/hESC_domains_hg19.bed'
-REF_SNPS = 'data/common-snps.tsv'
-REF_GENE_GTF = 'data/gencode.v19.annotation.gtf'
-TAD_LOC = 'data/hESC_domains_hg19.bed'
-REPEAT_FH = 'data/hg19.fa.out.tsv'
+snp_df = pd.read_table(REF_SNPS)
 
-####################################
-# PART 1 - SNPs ####################
-####################################
+big_snp_df, _ = curate_tad_elements(tad_df, snp_df, gen_class='snp')
 
-####################################
-# Initialize a dictionary with the structure:
-# 1st key: chromosome, 2nd key: TAD ID:start-stop
-####################################
-TADdict = initialize_TAD_dictionary(TAD_LOC)
+# Every SNP that did not map is in a boundary region
+boundary_snp_df = snp_df.query("rsid not in @big_snp_df.rsid")
+boundary_snp_df['TAD_id'] = "Boundary"
+boundary_snp_df['TAD_start'] = 0
+boundary_snp_df['TAD_end'] = 0
+
+all_snp_df = big_snp_df.append(boundary_snp_df)
+all_snp_df.to_csv(SNP_INDEX, sep='\t', compression='bz2')
 
 ####################################
-# Populate TAD dictionary with SNP data
+# PART 2 - Genes
 ####################################
-with open(REF_SNPS) as snp_fh:
-    snpfile = csv.reader(snp_fh, delimiter='\t')
-    next(snpfile)  # Skip header
-    for snprow in snpfile:
-        snprow.pop()
-        snp_chrom = snprow[0]
-        snp_pos = int(snprow[1])
+# Process data
+refGene_df = pd.read_table(REF_GENE_GTF, skiprows=5, header=None)
+refGene_df = refGene_df.drop(refGene_df.columns[[5, 7]], axis=1)
+refGene_df.columns = ['chromosome', 'db', 'type', 'start', 'stop', 'strand',
+                      'info']
+parsed_info_df = refGene_df.apply(parse_gene_gtf, axis=1)
+parsed_info_df.columns = ['gene_type', 'gene_name']
+refGene_df = pd.concat([refGene_df, parsed_info_df], axis=1)
+refGene_df = refGene_df[refGene_df['type'] == 'gene'].drop('info', axis=1)
 
-        # Subset lookup to only the given chromosome
-        match_idx = 0
-        for tad in TADdict[str(snp_chrom)]:
-            tadinfo = parse_TAD_name(tad)
-            tad_start = tadinfo[1]
-            tad_end = tadinfo[2]
+big_gene_df, bound_gene_df = curate_tad_elements(tad_df, refGene_df,
+                                                 gen_class='gene')
 
-            if tad_start <= snp_pos < tad_end:
-                TADdict[str(snp_chrom)][tad].append(snprow)
-                match_idx = 0  # reset match counter
-                continue
-            match_idx += 1
+# Which genes belong entirely in the boundary?
+only_bound_gene_df = refGene_df.ix[~refGene_df['gene_name']
+                                   .isin(big_gene_df['gene_name'])]
+only_bound_gene_df = only_bound_gene_df.ix[~only_bound_gene_df['chromosome']
+                                           .isin(['X', 'Y', 'M'])]
+only_bound_gene_df['TAD_id'] = "Boundary"
+only_bound_gene_df['TAD_start'] = 0
+only_bound_gene_df['TAD_end'] = 0
 
-        # If there are no matches, the SNP must be in a boundary
-        if match_idx == len(TADdict[str(snp_chrom)]):
-            TADdict['Boundary'].append(snprow)
-
-####################################
-# Once dict is loaded, make each value a pandas dataframe for easy lookup
-####################################
-COL_ID = ['CHROMOSOME', 'POSITION', 'MAF', 'RS']
-
-# Look over each key in the TAD dictionary
-for key in TADdict.iterkeys():
-    if "Boundary" not in key:
-        if len(TADdict[key]) > 0:
-            for lockey, locval in TADdict[key].iteritems():
-                if len(locval) > 0:
-                    TADdict[key][lockey] = pd.DataFrame(locval, columns=COL_ID)
-
-TADdict['Boundary'] = pd.DataFrame(TADdict['Boundary'], columns=COL_ID)
-
-####################################
-# Save dictionary in picklefile
-####################################
-pickle.dump(TADdict, open('index/SNPindex_1000G_hg19.p', 'wb'))
-
-####################################
-# PART 2 - Genes ###################
-####################################
-
-####################################
-# Initialize a dictionary with the structure:
-# 1st key: chromosome, 2nd key: TAD ID + Location
-####################################
-TADdict = initialize_TAD_dictionary(TAD_LOC)
-
-####################################
-# Load and process data into the dict
-####################################
-spanned_genes = []
-only_spanned_gene_names = []
-with open(REF_GENE_GTF) as refGene_fh:
-    refGene = csv.reader(refGene_fh, delimiter='\t')
-    next(refGene)  # Skip over header information
-    next(refGene)
-    next(refGene)
-    next(refGene)
-    next(refGene)
-
-    for row in refGene:
-
-        # We are only interested in genes here
-        if row[2] == 'gene':
-            g_info = parse_gene_gtf(row)
-
-            # Extract gene info and assign
-            gene_name = g_info[0]
-            gene_chrom = g_info[2]
-            gene_start = g_info[3]
-            gene_end = g_info[4]
-
-            # Currently, there are no Y or M chromosome TADs
-            if gene_chrom == 'Y' or gene_chrom == 'M':
-                continue
-
-            # Loop over all the TADs in the given chromosome
-            # to find which TAD the gene is found in
-            for key in TADdict[gene_chrom].iterkeys():
-                t_info = parse_TAD_name(key)  # Extract TAD info
-                tad_id = t_info[0]
-                tad_start = t_info[1]
-                tad_end = t_info[2]
-
-                # If the gene is entirely in the TAD, it belongs in
-                if gene_start >= tad_start and gene_end <= tad_end:
-                    TADdict[gene_chrom][key].append(g_info)
-                    continue
-
-                # If the gene is partially in, still put it in
-                if (tad_start <= gene_start <= tad_end or
-                        tad_start <= gene_end <= tad_end):
-                    TADdict[gene_chrom][key].append(g_info)
-
-                    if gene_name in only_spanned_gene_names:
-                        continue
-                    else:
-                        spanned_genes.append(g_info)
-
-                    # Keep track of spanning genes but only store once
-                    only_spanned_gene_names.append(gene_name)
-                    TADdict['Boundary'].append(g_info)
-                    continue
-
-####################################
-# Make each value a pandas dataframe for easy lookup
-####################################
-for chm in TADdict.iterkeys():
-    if chm not in ['Boundary', 'Y']:
-        for key, value in TADdict[chm].iteritems():
-            # Some TADs do not have any genes in them
-            if len(value) > 0:
-                TADdict[chm][key] = pd.DataFrame(value,
-                                                 columns=('gene', 'type',
-                                                          'chrom', 'start',
-                                                          'end', 'strand'))
-    else:
-        TADdict[chm] = pd.DataFrame(TADdict[chm], columns=('gene', 'type',
-                                                           'chrom', 'start',
-                                                           'end', 'strand'))
-
-# Write the spanned genes as a text file
-with open('tables/SpannedGenesAcrossTADs.tsv', 'w') as span_fh:
-    csv_file = csv.writer(span_fh, delimiter='\t')
-    csv_file.writerow(['gene', 'type', 'chrom', 'start', 'end', 'strand'])
-    for gene in spanned_genes:
-        csv_file.writerow(gene)
-
-####################################
-# Save dictionary in picklefile
-####################################
-pickle.dump(TADdict, open('index/Gene_Assignments_In_TADs_hg19.p', 'wb'))
+big_gene_tad_df = big_gene_df.append(only_bound_gene_df)
+big_gene_tad_df.to_csv(GENE_INDEX, sep='\t', compression='bz2')
+bound_gene_df.to_csv(SPANNED_GENES_FH, sep='\t')
 
 ####################################
 # PART 3 - Repeat Elements #########
 ####################################
+repeats_df = pd.read_csv(REPEAT_FH, delimiter='\t',
+                         skiprows=[0, 1, 2], header=None,
+                         names=['div', 'chromosome', 'start', 'stop',
+                                'repeat'],
+                         index_col=False, usecols=[2, 5, 6, 7, 11],
+                         converters={'start': rm_paren, 'stop': rm_paren})
+repeats_df['start'] = repeats_df['start'].astype(int)
+repeats_df['stop'] = repeats_df['stop'].astype(int)
 
-####################################
-# Load Data - Messy Repeat Data
-####################################
-RepeatElements = pd.read_csv(REPEAT_FH, delimiter='\t',
-                             skiprows=[0, 1, 2], header=None,
-                             names=['chrom', 'begin', 'end', 'repeat'],
-                             index_col=False, usecols=[5, 6, 7, 11])
+big_rep_tad_df, boundary_rep_df = curate_tad_elements(tad_df, repeats_df,
+                                                      gen_class='repeat')
 
-####################################
-# Initialize a dictionary with the structure:
-# 1st key: chromosome, 2nd key: TAD ID + Location
-####################################
-TADdict = initialize_TAD_dictionary(TAD_LOC)
-
-####################################
-# Load and process data into the dict
-####################################
-for idx, row in RepeatElements.iterrows():
-
-    # Extract repeat info and assign
-    chrom = row['chrom'][3:]
-    start = str(row['begin'])
-    end = str(row['end'])
-
-    if chrom not in TADdict.keys():
-        continue
-
-    if chrom in ['Y', 'Boundary']:
-        continue
-
-    if (')' not in start) and (')' not in end):
-        # Loop over all the TADs in the given chromosome
-        # to find which TAD the gene is found in
-        for key in TADdict[chrom].iterkeys():
-            t_info = parse_TAD_name(key)  # Extract TAD info
-            tad_start = t_info[1]
-            tad_end = t_info[2]
-
-            # If the gene is entirely in the TAD, it belongs in
-            if int(start) >= tad_start and int(end) <= tad_end:
-                TADdict[chrom][key].append([chrom, int(start),
-                                            int(end), row['repeat']])
-                continue
-
-            # If the gene is partially in, still put it in
-            if (tad_start <= int(start) <= tad_end or
-                    tad_start <= int(end) <= tad_end):
-                TADdict[chrom][key].append([chrom, int(start),
-                                            int(end), row['repeat']])
-                continue
-
-####################################
-# Make each value a pandas dataframe for easy lookup
-####################################
-for chm in TADdict.iterkeys():
-    if chm not in ['Y', 'Boundary']:
-        for key, value in TADdict[chm].iteritems():
-            # Some TADs do not have any genes in them
-            if len(value) > 0:
-                TADdict[chm][key] = pd.DataFrame(value,
-                                                 columns=('chrom', 'begin',
-                                                          'end', 'repeat'))
-####################################
-# Save dictionary in picklefile
-####################################
-pickle.dump(TADdict, open('index/Repeats_In_TADs_hg19.p', 'wb'))
+big_rep_tad_df = big_rep_tad_df.append(boundary_rep_df, ignore_index=True)
+big_rep_tad_df.to_csv(REPEAT_INDEX, sep='\t', compression='bz2')
