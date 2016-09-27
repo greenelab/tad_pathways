@@ -1,5 +1,5 @@
 """
-util.py
+scripts/tad_util/util.py
 Author: Greg Way
 
 Description:
@@ -11,10 +11,6 @@ Import into python scripts - do not envoke directly
 Output:
 See specific functions
 """
-
-##############################
-# Define functions
-##############################
 
 
 def load_tad(TAD_LOC):
@@ -34,6 +30,45 @@ def load_tad(TAD_LOC):
     TAD_df['chromosome'] = TAD_df['chromosome'].map(lambda x: x[3:])
 
     return TAD_df
+
+
+def assign_bin(row, bins, ID):
+    '''
+    Assign a genomic element to the bin inside a TAD
+
+    Parameters:
+    :param row: a row of an index file
+    :param bins: the number of bins to distribute each gene into
+    :param ID: the type of index file (either 'SNP', 'gene' or 'repeat')
+
+    Output:
+    The appropriate bin number for the given genomic information.
+    '''
+
+    tadstart = int(row['TAD_start'])
+    tadend = int(row['TAD_end'])
+
+    if row['TAD_id'] == 'Boundary':
+        return -1
+
+    if ID == 'SNP':
+        start_pos = int(row['position'])
+
+    elif ID in ['gene', 'repeat']:
+        start_pos = int(row['start'])
+
+    # Determine the bin the gene belongs in
+    diff = start_pos - tadstart
+    bin_assign = int(diff/(tadend - tadstart) * bins)
+
+    # Remove overlapping elements
+    if ID in ['gene', 'repeat']:
+        if diff < 0:
+            bin_assign = -1
+        elif tadend < start_pos:
+            bin_assign = -1
+
+    return bin_assign
 
 
 def parse_TAD_name(tad_name):
@@ -82,39 +117,6 @@ def parse_SNP_position(snp_info):
     The position of the SNP
     '''
     return int(snp_info['POSITION'])
-
-
-def ID_TAD_bins(tadkey, bins, start_pos, IDtype='SNP'):
-    '''
-    Parameters:
-    tadkey: the parsed output of parse_TAD_name()
-    bins: the number of bins to distribute each gene into
-    start_pos: starting position of element
-    IDtype: either 'SNP' (default) or 'Gene'
-
-    Output:
-    the appropriate bin number for the given input tadkey and SNP.
-    If IDtype='gene', the output will be -1 if the start site is not within TAD
-    (i.e. - the gene is overlapping boundary regions)
-    '''
-    # get information from the tadkey
-    tadstart = int(tadkey[1])
-    tadend = int(tadkey[2])
-
-    # Determine the bin the gene belongs in
-    diff = float(start_pos - int(tadstart))
-    if IDtype == 'SNP':
-        bin_assign = int(diff/(tadend - tadstart) * bins)
-    elif IDtype == 'gene':
-        if diff < 0:
-            bin_assign = -1
-        elif tadend < start_pos:
-            bin_assign = -1
-        else:
-            bin_assign = int(diff/(tadend - tadstart) * bins)
-
-    # Return the bin assignment
-    return bin_assign
 
 
 def parse_gene_info(gene_info):
