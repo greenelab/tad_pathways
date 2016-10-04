@@ -8,7 +8,7 @@
 ##############################
 
 ##############################
-# PART 1: Download Data
+# Part 1: Download Data
 ##############################
 # Download 1000G Phase III data, hg19 Gencode genes, NHGRI-EBI GWAS Catalog,
 # and hESC TAD domain boundaries for human and mouse genome
@@ -16,7 +16,7 @@ python scripts/download/download_hg.py
 python scripts/download/download_mm.py
 
 ##############################
-# PART 2: Process Data
+# Part 2: Process Data
 ##############################
 # Extract common SNPs from 1000 Genomes and mouse genome 
 python generate_common-snps.py --genome 'hg'
@@ -30,14 +30,14 @@ python generate_index_files.py --TAD-Boundary 'mESC'
 python generate_index_files.py --TAD-Boundary 'cortex'
 
 ##############################
-# PART 3: Visualize SNPs and Genes in TADs
+# Part 3: Visualize SNPs and Genes in TADs
 ##############################
 # Output histograms and line graphs of SNP/Gene/Repeat locations in TADs
 # and gc content distribution across human and mouse tads
-sh scripts/viz/visualize.sh
+bash scripts/visualize.sh
 
 ##############################
-# PART 4: TAD Pathway Analysis
+# Part 4: TAD Pathway Analysis
 ##############################
 # Convert human GWAS catalog to hg19
 python scripts/bin/convert_GWAS_catalog_hg19.py

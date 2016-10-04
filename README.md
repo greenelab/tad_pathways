@@ -3,32 +3,37 @@
 ## Summary
 
 The repository contains methods for manipulating, observing, and visualizing
-topologically associating domains (TADs) in the context of 1000 Genomes Phase
-III data, hg19 Gencode genes, and repeat elements. The repository also
+topologically associating domains (TADs) in the context of SNPs, genes, and 
+repeat elements for human (hg19) and mouse (mm9) genomes. The repository also
 proposes methods and tools for the incorporation of TAD domains into the
 prioritization of GWAS signals through the investigation of publicly available
-GWAS data. We introduce TAD pathways as a method to identify the likely causal
-genes from GWAS independent of distance to sentinel SNP.
+GWAS data. We introduce **TAD pathways** as a method to identify the likely
+causal genes from GWAS independent of distance to sentinel SNP.
 
 ## Contact
 
-For all questions and bug reporting please file
-[GitHub issues](https://github.com/greenelab/tad_pathways/issues)
+For all questions and bug reporting please file a
+[GitHub issue](https://github.com/greenelab/tad_pathways/issues)
+
+For all other questions contact Casey Greene at csgreene@mail.med.upenn.edu or
+Struan Grant at grants@email.chop.edu
 
 ## Usage
 
-Curate GWAS catalog and TAD boundaries to generate TAD based gene lists
+Curates the GWAS catalog and TAD boundaries to visualize TADs and generate
+TAD based gene lists. This will also perform a TAD pathways analysis for
+Bone Mineral Density GWAS.
 
 ```sh
-./ANALYSIS.sh
+bash scripts/run_pipeline.sh
 ```
 
-This will download data, perform analyses, and output several figures.
+This will download data, perform analyses, and output several genomic figures.
+The command will also output TAD based genes for 299 different GWAS traits.
 
 ## Tad Pathways
 
-The above command outputs TAD based genes for signal found in 299 different GWAS
-traits. As a case study to demonstrate the utility of a TAD based approach,
+As a case study to demonstrate the utility of a TAD based approach,
 input the TAD based gene list for the Bone Mineral Density (1,297 genes) into a
 pathway analysis:
 
