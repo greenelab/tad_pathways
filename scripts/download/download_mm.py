@@ -19,20 +19,20 @@ if not (os.path.exists(download_folder)):
 
 # 1. Mouse Genome Project SNPs v2
 base_url = 'ftp://ftp-mouse.sanger.ac.uk/REL-1211-SNPs_Indels/'
-fh = 'mgp.v2.snps.annot.reformat.vcf.gz'
-download_file(base_url, fh, download_folder)
+filename = 'mgp.v2.snps.annot.reformat.vcf.gz'
+download_file(base_url, filename, download_folder)
 
 # 2. Gencode Mouse
 base_url = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/'
-fh = 'gencode.vM9.annotation.gtf.gz'
-download_file(base_url, fh, download_folder)
+filename = 'gencode.vM9.annotation.gtf.gz'
+download_file(base_url, filename, download_folder)
 
 # 3. RepeatMasker mm9 Repeat Elements
 base_url = 'http://www.repeatmasker.org/genomes/mm9/RepeatMasker-rm328' \
            '-db20090604/'
-fh = 'mm9.fa.out.gz'
-download_file(base_url, fh, download_folder)
-process_repeats(download_folder, fh, genome)
+filename = 'mm9.fa.out.gz'
+download_file(base_url, filename, download_folder)
+process_repeats(download_folder, filename, genome)
 
 # 4. TAD Domain Boundaries
 base_url = 'http://chromosome.sdsc.edu/mouse/hi-c/'
@@ -52,5 +52,5 @@ if not os.path.exists(mm9_download_folder):
 
 # Download chromosome sequences
 for chrom in list(range(1, 20)) + ['X', 'Y']:
-    fh = 'chr{}.fa.gz'.format(chrom)
-    download_file(base_url, fh, mm9_download_folder)
+    filename = 'chr{}.fa.gz'.format(chrom)
+    download_file(base_url, filename, mm9_download_folder)
