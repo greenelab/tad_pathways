@@ -19,15 +19,15 @@ python scripts/download/download_mm.py
 # Part 2: Process Data
 ##############################
 # Extract common SNPs from 1000 Genomes and mouse genome 
-python generate_common-snps.py --genome 'hg'
-python generate_common-snps.py --genome 'mm'
+python scripts/generate_common-snps.py --genome 'hg'
+python scripts/generate_common-snps.py --genome 'mm'
 
 # Generate index files (maps to TAD identifiers to enable fast lookup)
 # 1000G SNP / genes / repeat elements
-python generate_index_files.py --TAD-Boundary 'hESC'
-python generate_index_files.py --TAD-Boundary 'IMR90'
-python generate_index_files.py --TAD-Boundary 'mESC'
-python generate_index_files.py --TAD-Boundary 'cortex'
+python scripts/generate_index_files.py --TAD-Boundary 'hESC'
+python scripts/generate_index_files.py --TAD-Boundary 'IMR90'
+python scripts/generate_index_files.py --TAD-Boundary 'mESC'
+python scripts/generate_index_files.py --TAD-Boundary 'cortex'
 
 ##############################
 # Part 3: Visualize SNPs and Genes in TADs
