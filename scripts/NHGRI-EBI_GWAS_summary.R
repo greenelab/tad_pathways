@@ -27,20 +27,28 @@ gwas_filter <- gwas_catalog[gwas_catalog$JOURNAL %in% repl_journals, ]
 dir.create(file.path("data", "gwas_catalog"))
 
 # Summarize the data and write to file
-gwas_traitinfo = list()
 traits <- unique(gwas_filter$`DISEASE/TRAIT`)
 num_snps <- c()
 for (trait in traits) {
   gwas_subset <- gwas_filter[gwas_filter$`DISEASE/TRAIT` == trait, ]
   num_snps <- c(num_snps, nrow(gwas_subset))
-  gwas_traitinfo[[trait]] <- gwas_subset[ , c("SNPS", "CHR_ID", "CHR_POS", 
+  gwas_traitinfo <- gwas_subset[ , c("SNPS", "CHR_ID", "CHR_POS", 
                                               "DISEASE/TRAIT", 
                                               "REPORTED GENE(S)", "MAPPED_GENE",
                                               "PUBMEDID")]
-  trait_name <- gsub(" ", "_", trait)
-  trait_name <- gsub("[/:(),.-]", "_", trait_name)
-  filename <- file.path("data", "gwas_catalog", paste0(trait_name, "_hg19.tsv"))
-  readr::write_tsv(gwas_traitinfo[[trait]], filename)
+  
+  # Remove SNPs that are not mapped
+  gwas_traitinfo <- gwas_traitinfo[complete.cases(gwas_traitinfo), ]
+  
+  # Generate file names
+  if (nrow(gwas_traitinfo) > 0) {
+    trait_name <- gsub(" ", "_", trait)
+    trait_name <- gsub("[/:(),.-]", "_", trait_name)
+    filename <- file.path("data", "gwas_catalog", paste0(trait_name,
+                                                         "_hg19.tsv"))
+    
+    readr::write_tsv(gwas_traitinfo, filename)
+  }
 }
 
 num_snp_order <- order(table(gwas_filter$`DISEASE/TRAIT`), decreasing = T)

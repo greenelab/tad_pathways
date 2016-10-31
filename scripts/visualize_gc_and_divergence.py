@@ -138,7 +138,7 @@ def determine_gc_content(seq, start, end):
     """
 
     import collections
-    
+
     start = int(start)
     end = int(end)
 

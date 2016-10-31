@@ -46,7 +46,7 @@ python scripts/bin/convert_GWAS_catalog_hg19.py
 Rscript scripts/NHGRI-EBI_GWAS_summary.R
 
 # Extract TAD based genes
-python scripts/build_TAD_genelists.py -T 'hESC'
+python scripts/build_TAD_genelists.py
 
 # ----------------------------
 # Manual Step - WebGestalt Analysis
