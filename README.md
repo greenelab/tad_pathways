@@ -1,5 +1,9 @@
 # Incorporating TADs into GWAS Analysis - TAD Pathways
 
+Gregory P. Way and Casey S. Greene 2016
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.163950.svg)](https://doi.org/10.5281/zenodo.163950)
+
 ## Summary
 
 The repository contains methods for manipulating, observing, and visualizing
@@ -54,15 +58,15 @@ pathway analysis on the gene list.
 | Significance Level | *Top10* |
 | Minimum Number of Genes for a Category | *4*
 
-Note - The output of `ANALYSIS.sh` in *data/TAD_based_genes/* for all traits is
-ready for TAD Pathway Analysis.
+Note - The output of `scripts/run_pipeline.sh` in *data/TAD_based_genes/* for all
+traits is ready for TAD Pathway Analysis.
 
 After performing the WebGestalt analysis, click `Export TSV Only` and save the
 file in `data/gestalt/<TRAIT>_gestalt.tsv` where `<TRAIT>` is "BMD" for the example.
 
 ## GWAS/eQTL Integration
 
-### Data Access  (see `download_data.sh` for more details)
+### Data Access
 
 * GWAS Catalog (2016-02-25)
 * eQTL (2016-05-09)
@@ -70,7 +74,10 @@ file in `data/gestalt/<TRAIT>_gestalt.tsv` where `<TRAIT>` is "BMD" for the exam
 
 ### Nearest gene GWAS reports
 
-* [Bone Mineral Density](http://www.ncbi.nlm.nih.gov/pubmed/22504420 "BMD")
+* [Richards _et al._ 2008 Lancet](http://doi.org/10.1016/S0140-6736(08)60599-1)
+* [Rivadeneira _et al._ 2009 Nature Genetics](http://doi.org/10.1038/ng.446)
+* [Estrada _et al._ 2012 Nature Genetics](http://doi.org/10.1038/ng.2249)
+* [Styrkarsdottir _et al._ 2013 Nature](http://doi.org/10.1038/nature12124)
 
 ### eQTL Browser Parameters
 
