@@ -1,26 +1,30 @@
-# (C) 2016 Gregory Way
-# Integrative_summary.R
+# 2016 Gregory Way
+# scripts/Integrative_summary.R
 
 # Description: 
 # Take as input the genes identified by the TAD pathway analysis, the eQTL
 # analysis, and the nearest gene GWAS to determine evidence overlaps
 
 # Usage:
-# The script is run by ./ANALYSIS.sh with the given arguments
+# The script is run by scripts/run_pipeline with evidence file and trait as
+# command arguments
 
 # Output:
 # Venn diagrams of disease specific evidence overlaps
+
+library("checkpoint")
+checkpoint("2016-02-25")
 
 # Load in command arguments
 args <- commandArgs(trailingOnly = T)
 
 # Parse command argumentsx
-EVIDENCE <- args[1]
-TRAIT <- args[2]
-VENN_FH <- paste0('figures/venn_', TRAIT, '.png')
+evidence <- args[1]
+trait <- args[2]
+venn_output_file <- file.path('figures', paste0('venn_', trait, '.tiff'))
 
 # Read in Data
-evidence_genes <- readr::read_csv(EVIDENCE)
+evidence_genes <- readr::read_csv(evidence)
 
 # Prepare for VennDiagram input
 tad_genes <- c()
@@ -52,7 +56,8 @@ for (gene in 1:nrow(evidence_genes)) {
   
 }
 
-venn_list <- list('eQTL' = eqtl_genes, 'GWAS' = gwas_genes, 'TAD Pathway' = tad_genes)
+venn_list <- list('eQTL' = eqtl_genes, 'GWAS' = gwas_genes,
+                  'TAD Pathway' = tad_genes)
 
 # Output Venn Diagram
 VennDiagram::venn.diagram(x = venn_list,
@@ -61,5 +66,4 @@ VennDiagram::venn.diagram(x = venn_list,
                           height = 1500,
                           width = 1500,
                           euler.d = F,
-                          scaled = F,
-                          imagetype = 'png')
+                          scaled = F)

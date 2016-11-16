@@ -55,9 +55,10 @@ python scripts/build_TAD_genelists.py
 # http://bioinfo.vanderbilt.edu/webgestalt/
 
 # For WebGestalt Parameters see README
-# Click 'Export TSV Only' and save as 'data/gestalt/BMD_gestalt.tsv'
+# Click 'Export TSV Only' and save as 'data/gestalt/<TRAIT>_gestalt.tsv'
+# An example output is given for BMD as 'data/gestat/BMD_gestalt.tsv'
 
-# Process WebGestalt Parameters for BMD and T2D
+# Process WebGestalt Output
 python scripts/parse_gestalt.py -t BMD
 
 ##############################
@@ -66,24 +67,26 @@ python scripts/parse_gestalt.py -t BMD
 # ----------------------------
 # Manual Step - See README for instructions on how to download eQTL data
 # ----------------------------
+# An example file is given for BMD as 'data/eqtl/eqtl_BMD_genelist.tsv'
 
 ##############################
 # PART 6: Integrative GWAS/eQTL/TAD Analysis
+# Using BMD Example
 ##############################
 # Output evidence tables
 python scripts/construct_evidence.py \
-        --trait BMD \
-        --eqtl data/eqtl/eqtl_BMD_genelist.tsv \
-        --genelist data/gwas_based_genes/Bone_mineral_density_hg19_SNPs_GWAS_genelists.tsv \
+        --trait 'BMD' \
+        --eqtl 'data/eqtl/eqtl_BMD_genelist.tsv' \
+        --genelist 'data/gwas_catalog/Bone_mineral_density_hg19.tsv' \
         --pathway 'skeletal system development'
 
 # Summarize GWAS/eQTL/TAD evidence
 python scripts/assign_evidence_to_TADs.py \
-        --evidence tad_pathway/BMD_gene_evidence.csv \
-        --snps data/gwas_TAD_location/Bone_mineral_density_hg19_SNPs.tsv \
-        --output-file tad_pathway/BMD_evidence_summary.tsv
+        --evidence 'tad_pathway/BMD_gene_evidence.csv' \
+        --snps 'data/gwas_TAD_location/Bone_mineral_density_hg19_SNPs.tsv' \
+        --output_file 'tad_pathway/BMD_evidence_summary.tsv'
 
-# Output venn diagrams and gene lists for both traits
-R --no-save --args tad_pathway/BMD_gene_evidence.csv \
-BMD < integrative_summary.R
+# Output venn diagrams and gene lists
+R --no-save --args 'tad_pathway/BMD_gene_evidence.csv' \
+        'BMD' < integrative_summary.R
 

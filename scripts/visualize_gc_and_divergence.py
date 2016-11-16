@@ -12,9 +12,10 @@ Is called by 'scripts/visualize.sh' which is run inside of
         python gc_content_distribution.py --TAD-Boundary 'hESC'
 
 Output:
-GC Content distribution and histogram across TADs as a .png file
+GC Content distribution and histogram across TADs as a .pdf file
 """
 
+import os
 import random
 import argparse
 
@@ -40,33 +41,37 @@ parser.add_argument('-t', '--TAD-Boundary', help='boundary cell type. The'
 args = parser.parse_args()
 
 # Define Constants
-NUM_BINS = 50
-xlab = [''] * NUM_BINS
+num_bins = 50
+xlab = [''] * num_bins
 for x in range(0, 50, 10):
     xlab[x] = x
-TAD_CELL = args.TAD_Boundary
+tad_cell = args.TAD_Boundary
 
 # Generate file names depending on input
-if TAD_CELL in ['hESC', 'IMR90']:
-    GENOME = 'hg19'
-    BASE_DIR = 'data/hg/'
-elif TAD_CELL in ['mESC', 'cortex']:
-    GENOME = 'mm9'
-    BASE_DIR = 'data/mm/'
+if tad_cell in ['hESC', 'IMR90']:
+    genome = 'hg19'
+    base_dir = os.path.join('data', 'hg')
+elif tad_cell in ['mESC', 'cortex']:
+    genome = 'mm9'
+    base_dir = os.path.join('data', 'mm')
 else:
     raise ValueError('Please input: "hESC", "IMR90", "mESC", or "cortex"')
 
-BASE_FH = GENOME + '_' + TAD_CELL
-REPEAT_INDEX = 'index/REPEATS_index_' + BASE_FH + '.tsv.bz2'
-GC_FIG_FH = 'figures/' + GENOME + '/gc_distribution_' + BASE_FH + '.png'
-DIV_FIG_FH = 'figures/' + GENOME + '/repeat_divergence_' + BASE_FH + '.png'
-ALU_FIG_FH = 'figures/' + GENOME + '/alu_divergence_' + BASE_FH + '.png'
-TAD_LOC = BASE_DIR + TAD_CELL + '_domains_' + GENOME + '.bed'
+base_file = '{}_{}'.format(genome, tad_cell)
+repeat_index = os.path.join('index',
+                            'REPEATS_index_{}.tsv.bz2'.format(base_file))
+gc_fig_file = os.path.join('figures', genome,
+                           'gc_distribution_{}.pdf'.format(base_file))
+div_fig_file = os.path.join('figures', genome,
+                            'repeat_divergence_{}.pdf'.format(base_file))
+alu_fig_file = os.path.join('figures', genome,
+                            'alu_divergence_{}.pdf'.format(base_file))
+tad_loc = os.path.join(base_dir, '{}_domains_{}.bed'.format(tad_cell, genome))
 
-if GENOME == 'hg19':
-    FASTA_LOC = 'data/hg/hg19_fasta/'
-elif GENOME == 'mm9':
-    FASTA_LOC = 'data/mm/mm9_fasta/'
+if genome == 'hg19':
+    fasta_loc = os.path.join('data', 'hg', 'hg19_fasta')
+elif genome == 'mm9':
+    fasta_loc = os.path.join('data', 'mm', 'mm9_fasta')
 
 
 def load_fasta(chrom, fasta_loc):
@@ -81,7 +86,7 @@ def load_fasta(chrom, fasta_loc):
     fasta file for the given chromosome
     """
 
-    chrom_fa = fasta_loc + 'chr' + chrom + '.fa'
+    chrom_fa = os.path.join(fasta_loc,  'chr{}.fa'.format(chrom))
     record = SeqIO.read(open(chrom_fa), 'fasta')
 
     nucleotides = str(record.seq)
@@ -188,10 +193,10 @@ def get_gc_content(tad, seq, bins):
     return pd.Series(tad_gc)
 
 # Load Data
-tad_df = load_tad(TAD_LOC)
-repeat_df = pd.read_table(REPEAT_INDEX, index_col=0)
+tad_df = load_tad(tad_loc)
+repeat_df = pd.read_table(repeat_index, index_col=0)
 repeat_df = repeat_df.ix[~pd.isnull(repeat_df['TAD_id'])]
-bin_r = repeat_df.apply(lambda x: assign_bin(x, bins=NUM_BINS, ID='repeat'),
+bin_r = repeat_df.apply(lambda x: assign_bin(x, bins=num_bins, ID='repeat'),
                         axis=1)
 repeat_df = repeat_df.assign(tad_bin=bin_r)
 repeat_df = repeat_df[repeat_df['tad_bin'] != -1]
@@ -205,7 +210,7 @@ p.set(xticklabels=xlab)
 p.set(ylabel='Repeat Divergence', xlabel='TAD Bins')
 p.set_title('')
 plt.tight_layout()
-plt.savefig(DIV_FIG_FH)
+plt.savefig(div_fig_file)
 plt.close()
 
 # ALU divergence
@@ -216,16 +221,16 @@ p.set(xticklabels=xlab)
 p.set(ylabel='ALU Repeat Divergence', xlabel='TAD Bins')
 p.set_title('')
 plt.tight_layout()
-plt.savefig(ALU_FIG_FH)
+plt.savefig(alu_fig_file)
 plt.close()
 
 # Plot GC content
 gc_content_df = pd.DataFrame()
 for chrom in tad_df['chromosome'].unique():
     tad_sub = tad_df[tad_df['chromosome'] == chrom]
-    fasta = load_fasta(str(chrom), FASTA_LOC)
+    fasta = load_fasta(str(chrom), fasta_loc)
     gc_content = tad_sub.apply(lambda x: get_gc_content(x, seq=fasta,
-                                                        bins=NUM_BINS), axis=1)
+                                                        bins=num_bins), axis=1)
     gc_content_df = gc_content_df.append(gc_content, ignore_index=True)
 
 p = sns.boxplot(data=gc_content_df, color=sns.xkcd_rgb['medium green'])
@@ -234,5 +239,5 @@ p.set(xticklabels=xlab)
 p.set(ylabel='GC Content', xlabel='TAD Bins')
 p.set_title('')
 plt.tight_layout()
-plt.savefig(GC_FIG_FH)
+plt.savefig(gc_fig_file)
 plt.close()

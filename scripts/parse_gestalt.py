@@ -1,13 +1,13 @@
 """
-(C) 2016 Gregory Way
-parse_gestalt.py
+2016 Gregory Way
+scripts/parse_gestalt.py
 
 Description:
 Take as input the .tsv results from the WebGestalt analysis and outputs trait
 specific TAD pathway genes
 
 Usage:
-Command line 'python parse_gestalt.py -t <TRAIT>'
+Command line 'python scripts/parse_gestalt.py -t <TRAIT>'
 
     -t <TRAIT> is predefined by the manual WebGestalt step (see README)
     e.g. <TRAIT> is BMD for Bone Mineral Density
@@ -16,13 +16,10 @@ Output:
 pickle files with pathway specific dictionaries and summary of pathway p values
 """
 
-from optparse import OptionParser
+import os
+import argparse
 import pandas as pd
-import StringIO
-
-###################
-# Define Functions
-###################
+import io
 
 
 def read_gestalt(fh):
@@ -55,7 +52,7 @@ def read_gestalt(fh):
     pathway_adjp = []
     pathway_numgenes = []
     for pathway in stanzas:
-        pathway_file = StringIO.StringIO(pathway)
+        pathway_file = io.StringIO(pathway)
 
         # Parse pathway and enrichment information
         go_info = next(pathway_file).rstrip('\n').split('\t')
@@ -90,29 +87,24 @@ def read_gestalt(fh):
 
     return return_df, gen_info
 
-# Run the command if called by name
 if __name__ == '__main__':
-    ####################################
+
     # Load Command Arguments
-    ####################################
-    parser = OptionParser()  # Load command line options
-    parser.add_option("-t", "--trait", dest="trait",
-                      help="symbol for trait data", type="string")
-    (options, args) = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--trait', help='symbol for trait data')
+    args = parser.parse_args()
 
-    ####################################
     # Load Constants
-    ####################################
-    TRAIT = options.trait
-    TRAIT_FH = 'data/gestalt/' + TRAIT + '_gestalt.tsv'
-    OUT_TRAIT_FH = 'data/gestalt/' + TRAIT + '_complete_gestalt.tsv'
-    OUT_P_FH = 'data/gestalt/' + TRAIT + '_pvalues.tsv'
+    trait = args.trait
+    trait_file = os.path.join('data', 'gestalt',
+                              '{}_gestalt.tsv'.format(trait))
+    trait_out_file = os.path.join('data', 'gestalt',
+                                  '{}_complete_gestalt.tsv'.format(trait))
+    out_p_val = os.path.join('data', 'gestalt', '{}_pvalues.tsv'.format(trait))
 
-    ####################################
-    # Load and Save Data
-    ####################################
-    gestalt_data, gestalt_p = read_gestalt(TRAIT_FH)
+    # Load Data
+    gestalt_data, gestalt_p = read_gestalt(trait_file)
 
     # Write files
-    gestalt_data.to_csv(OUT_TRAIT_FH, sep='\t', index=False)
-    gestalt_p.to_csv(OUT_P_FH, sep='\t', index=False)
+    gestalt_data.to_csv(trait_out_file, sep='\t', index=False)
+    gestalt_p.to_csv(out_p_val, sep='\t', index=False)

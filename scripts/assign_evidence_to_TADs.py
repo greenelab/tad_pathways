@@ -1,56 +1,50 @@
 """
-(C) 2016 Gregory Way
-assign_evidence_to_TADs.py
+2016 Gregory Way
+scripts/assign_evidence_to_TADs.py
 
 Description:
 Takes in genes and evidence support and assigns each gene to the TAD
 
 Usage:
-python assign_evidence_to_TADs.py -e path/to/evidence.csv -t path/to/TADassign
+Command line:
+
+     python scripts/assign_evidence_to_TADs.py
+
+With the following flags:
+
+     --evidence         The location of the evidence file
+     --spns             The location of TAD based SNP file
+     --output_file      Where to save the final output
 
 Output:
 Trait specific .tsv files of one column each indicating all the genes that fall
 in signal TADs
 """
 
-from optparse import OptionParser
+import os
+import argparse
 import pandas as pd
 import csv
-import math
 
-####################################
 # Load Command Arguments
-####################################
-parser = OptionParser()  # Load command line options
-parser.add_option("-e", "--evidence-fh", dest="evidence_fh",
-                  help="Location of evidence file", type="string")
-parser.add_option("-t", "--path-to-tad", dest="tad",
-                  help="path to TAD/GWAS data", type="string")
-parser.add_option("-o", "--output-fh", dest="out_fh",
-                  help="location to write results", type="string")
-(options, args) = parser.parse_args()
+parser = argparse.ArgumentParser()
+parser.add_argument("-e", "--evidence", help="Location of evidence file")
+parser.add_argument("-s", "--snps", help="location of TAD mapped SNPs")
+parser.add_argument("-o", "--output_file", help="location to write results")
+args = parser.parse_args()
 
-####################################
 # Load Constants
-####################################
-EVIDENCE_FH = options.evidence_fh
-TAD_GWAS_FH = options.tad
-OUT_FH = options.out_fh
+evidence_file = args.evidence
+snp_file = args.snps
+output_file = args.output_file
 
-####################################
-# Load picklefile (dictionary)
-####################################
-TADdictgenes = pd.read_pickle('index/Gene_Assignments_In_TADs_hg19.p')
-
-####################################
 # Load data
-####################################
-TADGWAS = pd.read_csv(TAD_GWAS_FH, sep='\t')
-EVIDENCE = pd.read_csv(EVIDENCE_FH)
-
-####################################
-# Define Functions
-####################################
+gene_index = os.path.join('index', 'GENE_index_hg19_hESC.tsv.bz2')
+gene_df = pd.read_table(gene_index, index_col=0)
+evidence_df = pd.read_csv(evidence_file)
+tad_gwas_df = pd.read_csv(snp_file, sep='\t')
+tad_gwas_df = tad_gwas_df.dropna(subset=['TADidx'])
+tad_gwas_df = tad_gwas_df.reset_index(drop=True)
 
 
 def buildTADkey(gwas_snp):
@@ -65,7 +59,8 @@ def buildTADkey(gwas_snp):
     end = int(gwas_snp['TADEnd'])
     tad_num = int(gwas_snp['TADidx'])
     output = str(tad_num) + ':' + str(start) + '-' + str(end)
-    return (str(chrom), output)
+    evidence_key = 'chr{}:{}'.format(str(chrom), output)
+    return evidence_key
 
 
 def parse_ev_key(tadkey):
@@ -84,65 +79,40 @@ def parse_ev_key(tadkey):
     ucsc = chrom + ':' + start + '-' + end
     return [ID, chrom, start, end, ucsc]
 
-####################################
 # Investigate each significant TADs
-####################################
 evidence_dict = {}
-for tadix in range(len(TADGWAS)):
-    # Subset the pandas File
-    tad_sub = TADGWAS.ix[tadix, :]
+for tad_row in range(len(tad_gwas_df)):
+    snp_info = tad_gwas_df.ix[tad_row, :]
 
-    # Get the gene identified in the GWAS
-    gene = str(tad_sub['gene']).split(',')
-    gene = [x.strip(' ') for x in gene]
+    # Build the key to lookup TAD in dict and lookup
+    e_key = buildTADkey(snp_info)
 
-    # If the gene does fall in a TAD
-    if not math.isnan(tad_sub['TADidx']):
+    if e_key not in evidence_dict.keys():
+        evidence_dict[e_key] = []
 
-        # Build the key to lookup TAD in dict and lookup
-        chrom, TADkey = buildTADkey(tad_sub)
-        FullTADinfo = TADdictgenes[chrom][TADkey]
+    tad_index = int(snp_info['TADidx'])
+    tad_subset_info = gene_df.ix[gene_df['TAD_id'] == str(tad_index), :]
+    tad_genes = tad_subset_info['gene_name'].tolist()
 
-        # Build evidence key
-        e_key = 'chr{}:{}'.format(chrom, TADkey)
+    # Subset the evidence dataframe to TAD based genes
+    evidence_sub = evidence_df.ix[evidence_df['gene'].isin(tad_genes), :]
 
-        if e_key not in evidence_dict.keys():
-            evidence_dict[e_key] = []
+    # Loop over each of the rows
+    TAD_gene_evidence = []
+    for ev in range(0, evidence_sub.shape[0]):
+        gene = evidence_sub['gene'].tolist()[ev]
+        ev_type = evidence_sub['evidence'].tolist()[ev]
+        TAD_gene_evidence.append([gene, ev_type])
 
-        # if the TAD is not empty
-        if len(FullTADinfo) > 0:
+    evidence_dict[e_key].append(TAD_gene_evidence)
 
-            # Get the genes in the TAD
-            TAD_genes = FullTADinfo.gene[0:].tolist()
-
-            # Subset the evidence data frame to genes in TAD
-            evidence_sub = EVIDENCE.ix[EVIDENCE['gene'].isin(TAD_genes), :]
-
-            # Loop over each of the rows
-            TAD_gene_evidence = []
-            for ev in range(0, evidence_sub.shape[0]):
-                gene = evidence_sub['gene'].tolist()[ev]
-                ev_type = evidence_sub['evidence'].tolist()[ev]
-                TAD_gene_evidence.append([gene, ev_type])
-
-            # Add this gene and evidence to the dictionary
-            evidence_dict[e_key].append(TAD_gene_evidence)
-
-####################################
 # Write out results to file
-####################################
-with open(OUT_FH, 'w') as out_fh:
+with open(output_file, 'w') as out_fh:
     tadwriter = csv.writer(out_fh, delimiter='\t')
-    tadwriter.writerow(('ID', 'CHROMOSOME', 'START', 'END', 'UCSC', 'GENE',
-                        'EVIDENCE'))
+    tadwriter.writerow(['gene', 'evidence', 'TAD ID', 'chromosome',
+                        'TAD Start', 'TAD End', 'UCSC'])
     for tadkey in evidence_dict.keys():
-        info = parse_ev_key(tadkey)
-        ID, chrom, start, end, ucsc = info
-        loop_idx = 0
+        ID, chrom, start, end, ucsc = parse_ev_key(tadkey)
         for evidence in evidence_dict[tadkey][0]:
-            gene, e = evidence
-            if loop_idx == 0:
-                tadwriter.writerow((ID, chrom, start, end, ucsc, gene, e))
-            else:
-                tadwriter.writerow([None] * 5 + [gene, e])
-            loop_idx += 1
+            gene, evidence = evidence
+            tadwriter.writerow([gene, evidence, ID, chrom, start, end, ucsc])
