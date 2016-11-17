@@ -9,7 +9,8 @@
 # 5. mm9 sequence
 
 import os
-from download_util import download_file, process_repeats
+import shutil
+from download_util import download_file, process_repeats, untar_mouse_domain
 
 # Make new folder if it doesn't exist already
 genome = 'mm'
@@ -40,7 +41,14 @@ mESC = 'mESC.domain.tar.gz'
 cortex = 'cortex.domain.tar.gz'
 download_file(base_url, mESC, download_folder)
 download_file(base_url, cortex, download_folder)
-# TODO - process these domain files (extract and take combined)
+untar_mouse_domain(download_folder + mESC)
+untar_mouse_domain(download_folder + cortex)
+os.rename('mESC/HindIII_combined/total.HindIII.combined.domain',
+          'data/mm/mESC_domains_mm9.bed')
+os.rename('cortex/combined/total.combined.domain',
+          'data/mm/cortex_domains_mm9.bed')
+shutil.rmtree('mESC')
+shutil.rmtree('cortex')
 
 # 5. mm9 Full Sequence
 mm9_download_folder = 'data/mm/mm9_fasta/'
