@@ -22,13 +22,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from tad_util.util import load_tad, assign_bin
 
-plt.figure.max_open_warning = 0
-sns.set_style("whitegrid")
-sns.set_style("ticks")
-sns.set_context("paper", rc={"font.size": 20, "axes.titlesize": 20,
-                             "axes.labelsize": 20, "xtick.labelsize": 12,
-                             "ytick.labelsize": 12})
-
 
 def curate_gwas_elements(tad_df, input_df):
     """
@@ -61,6 +54,14 @@ def curate_gwas_elements(tad_df, input_df):
         big_out_df = big_out_df.append(elem_sub_df, ignore_index=True)
 
     return big_out_df
+
+# Set plotting defaults
+plt.figure.max_open_warning = 0
+sns.set_style("whitegrid")
+sns.set_style("ticks")
+sns.set_context("paper", rc={"font.size": 20, "axes.titlesize": 20,
+                             "axes.labelsize": 20, "xtick.labelsize": 12,
+                             "ytick.labelsize": 12})
 
 # Load Constants
 num_bins = 50
