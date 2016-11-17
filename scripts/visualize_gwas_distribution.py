@@ -55,6 +55,9 @@ def curate_gwas_elements(tad_df, input_df):
 
     return big_out_df
 
+# Load Bins Constant
+NUM_BINS = 50
+
 # Set plotting defaults
 plt.figure.max_open_warning = 0
 sns.set_style("whitegrid")
@@ -62,11 +65,9 @@ sns.set_style("ticks")
 sns.set_context("paper", rc={"font.size": 20, "axes.titlesize": 20,
                              "axes.labelsize": 20, "xtick.labelsize": 12,
                              "ytick.labelsize": 12})
-
-# Load Constants
-num_bins = 50
-xlab = [''] * num_bins
-for x in range(0, 50, 10):
+# Set x axis labels
+xlab = [''] * NUM_BINS
+for x in range(0, NUM_BINS, 10):
     xlab[x] = x
 
 # Load and process data
@@ -85,9 +86,9 @@ hesc_tad_df = curate_gwas_elements(hesc_df, gwas_df)
 imr_tad_df = curate_gwas_elements(imr_df, gwas_df)
 
 # Assign bins to gwas signals
-hesc_bins = hesc_tad_df.apply(lambda x: assign_bin(x, bins=num_bins, ID='SNP'),
+hesc_bins = hesc_tad_df.apply(lambda x: assign_bin(x, bins=NUM_BINS, ID='SNP'),
                               axis=1)
-imr_bins = imr_tad_df.apply(lambda x: assign_bin(x, bins=num_bins, ID='SNP'),
+imr_bins = imr_tad_df.apply(lambda x: assign_bin(x, bins=NUM_BINS, ID='SNP'),
                             axis=1)
 hesc_tad_df = hesc_tad_df.assign(tad_bin=hesc_bins)
 imr_tad_df = hesc_tad_df.assign(tad_bin=imr_bins)
