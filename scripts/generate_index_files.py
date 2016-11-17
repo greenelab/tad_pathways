@@ -20,6 +20,7 @@ Output:
 3 gzipped tsv index files and a tsv file of all genes that span TAD boundaries
 """
 
+import os
 import argparse
 import pandas as pd
 from tad_util.util import load_tad, parse_gene_gtf
@@ -119,6 +120,10 @@ def curate_tad_elements(tad_df, input_df, gen_class):
 
 # For parsing messy repeat info data
 def rm_paren(x): return x.strip('(').strip(')')
+
+# Create index path
+if not os.path.exists('index'):
+    os.makedirs('index')
 
 # Read in TAD boundary file
 tad_df = load_tad(TAD_LOC)
