@@ -15,12 +15,12 @@ from download_util import download_file, process_repeats
 
 # Make new folder if it doesn't exist already
 genome = 'hg'
-download_folder = 'data/' + genome + '/'
+download_folder = os.path.join('data', genome)
 if not (os.path.exists(download_folder)):
     os.makedirs(download_folder)
 
 # 1. 1000 Genomes Phase III SNPs
-KG_folder = 'data/hg/raw1000G/'
+KG_folder = os.path.join('data', 'hg', 'raw1000G')
 base_url = 'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/'
 
 # Create download directory
