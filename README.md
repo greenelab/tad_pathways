@@ -16,7 +16,7 @@ publicly available GWAS data. We introduce **TAD pathways** as a method to
 identify the likely causal genes from GWAS independent of distance to sentinel
 SNP.
 
-A preprint of our method is available [here on bioRxiv]( http://dx.doi.org/10.1101/087718)
+A preprint of our method is available [here on bioRxiv](http://dx.doi.org/10.1101/087718)
 
 ## Contact
 
