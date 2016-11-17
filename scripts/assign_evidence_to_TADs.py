@@ -113,6 +113,6 @@ with open(output_file, 'w') as out_fh:
                         'TAD Start', 'TAD End', 'UCSC'])
     for tadkey in evidence_dict.keys():
         ID, chrom, start, end, ucsc = parse_ev_key(tadkey)
-        for evidence in evidence_dict[tadkey][0]:
-            gene, evidence = evidence
+        for gene_evidence_list in evidence_dict[tadkey][0]:
+            gene, evidence = gene_evidence_list
             tadwriter.writerow([gene, evidence, ID, chrom, start, end, ucsc])
