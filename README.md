@@ -1,4 +1,4 @@
-# Incorporating TADs into GWAS Analysis - TAD Pathways
+# Incorporating TADs into GWAS Analysis - TAD_Pathways
 
 Gregory P. Way and Casey S. Greene 2016
 
@@ -8,11 +8,15 @@ Gregory P. Way and Casey S. Greene 2016
 
 The repository contains methods for manipulating, observing, and visualizing
 topologically associating domains (TADs) in the context of SNPs, genes, and 
-repeat elements for human (hg19) and mouse (mm9) genomes. The repository also
-proposes methods and tools for the incorporation of TAD domains into the
-prioritization of GWAS signals through the investigation of publicly available
-GWAS data. We introduce **TAD pathways** as a method to identify the likely
-causal genes from GWAS independent of distance to sentinel SNP.
+repeat elements for human (hg19) and mouse (mm9) genomes.
+
+The repository also proposes methods and tools for the incorporation of TAD
+domains into the prioritization of GWAS signals through the investigation of
+publicly available GWAS data. We introduce **TAD pathways** as a method to
+identify the likely causal genes from GWAS independent of distance to sentinel
+SNP.
+
+A preprint of our method is available [here on bioRxiv]( http://dx.doi.org/10.1101/087718)
 
 ## Contact
 
@@ -34,8 +38,9 @@ bash scripts/run_pipeline.sh
 
 This will download data, perform analyses, and output several genomic figures.
 The command will also output TAD based genes for 299 different GWAS traits.
+Our TAD_Pathways method can be applied directly using these gene lists.
 
-## Tad Pathways
+## Tad_Pathways
 
 As a case study to demonstrate the utility of a TAD based approach,
 input the TAD based gene list for the Bone Mineral Density (1,297 genes) into a
@@ -72,7 +77,7 @@ file in `data/gestalt/<TRAIT>_gestalt.tsv` where `<TRAIT>` is "BMD" for the exam
 * eQTL (2016-05-09)
 [eQTL Browser](http://www.ncbi.nlm.nih.gov/projects/gap/eqtl/index.cgi "eQTL")
 
-### Nearest gene GWAS reports
+### Nearest BMD gene GWAS reports
 
 * [Richards _et al._ 2008 Lancet](http://doi.org/10.1016/S0140-6736(08)60599-1)
 * [Rivadeneira _et al._ 2009 Nature Genetics](http://doi.org/10.1038/ng.446)
