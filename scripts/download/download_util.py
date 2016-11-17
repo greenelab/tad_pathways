@@ -33,3 +33,13 @@ def process_repeats(base_dir, filename, genome):
     # Replace variable length space delimiters with tabs and output tsv file
     CMD = "sed 's/ \+/\\t/g' " + full_loc[:-3] + " > " + full_loc[:-3] + ".tsv"
     call(CMD, shell=True)
+
+
+def untar_mouse_domain(tar_file):
+    """
+    Mouse domains are downloaded as a tar archive - extracts contents
+    """
+    import tarfile
+
+    tar = tarfile.open(tar_file)
+    tar.extractall()
