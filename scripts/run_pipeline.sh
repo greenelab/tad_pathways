@@ -7,6 +7,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##############################
 
+Rscript --vanilla scripts/install.R
+
 ##############################
 # Part 1: Download Data
 ##############################
@@ -40,7 +42,7 @@ bash scripts/visualize.sh
 # Part 4: TAD Pathway Analysis
 ##############################
 # Convert human GWAS catalog to hg19
-python scripts/bin/convert_GWAS_catalog_hg19.py
+python scripts/convert_GWAS_catalog_hg19.py
 
 # Extract data from NHGRI-EBI GWAS catalog
 Rscript scripts/NHGRI-EBI_GWAS_summary.R
@@ -88,5 +90,5 @@ python scripts/assign_evidence_to_TADs.py \
 
 # Output venn diagrams and gene lists
 R --no-save --args 'tad_pathway/BMD_gene_evidence.csv' \
-        'BMD' < integrative_summary.R
+        'BMD' < scripts/integrative_summary.R
 

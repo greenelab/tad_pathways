@@ -15,10 +15,10 @@
 # and a histogram of number of SNPs per trait/disease
 
 library("checkpoint")
-suppressMessages(checkpoint("2016-02-25", checkpointLocation = "."))
+checkpoint("2016-02-25")
 
 # Load data
-gwas_catalog <- readr::read_tsv("data/gwas_catalog_hg19.tsv")
+gwas_catalog <- readr::read_tsv("data/hg/gwas_catalog_hg19.tsv")
 
 # Filter data to only replication required journals
 repl_journals <- c("N Engl J Med", "Science", "Nature", "Nat Genet", "Lancet")
