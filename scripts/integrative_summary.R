@@ -1,5 +1,5 @@
 # 2016 Gregory Way
-# scripts/Integrative_summary.R
+# scripts/integrative_summary.R
 
 # Description: 
 # Take as input the genes identified by the TAD pathway analysis, the eQTL
@@ -61,7 +61,7 @@ venn_list <- list('eQTL' = eqtl_genes, 'GWAS' = gwas_genes,
 
 # Output Venn Diagram
 VennDiagram::venn.diagram(x = venn_list,
-                          filename = VENN_FH,
+                          filename = venn_output_file,
                           fill = c("red", "blue", "yellow"),
                           height = 1500,
                           width = 1500,
