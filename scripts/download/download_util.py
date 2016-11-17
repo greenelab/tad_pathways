@@ -35,11 +35,11 @@ def process_repeats(base_dir, filename, genome):
     call(CMD, shell=True)
 
 
-def untar_mouse_domain(tar_file):
+def untar_mouse_domain(tar_path):
     """
     Mouse domains are downloaded as a tar archive - extracts contents
     """
     import tarfile
 
-    tar = tarfile.open(tar_file)
+    tar = tarfile.open(tar_path)
     tar.extractall()
