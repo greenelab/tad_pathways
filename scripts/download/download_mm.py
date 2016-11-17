@@ -14,7 +14,7 @@ from download_util import download_file, process_repeats, untar_mouse_domain
 
 # Make new folder if it doesn't exist already
 genome = 'mm'
-download_folder = 'data/mm/'
+download_folder = os.path.join('data', 'mm')
 if not (os.path.exists(download_folder)):
     os.makedirs(download_folder)
 
@@ -41,17 +41,18 @@ mESC = 'mESC.domain.tar.gz'
 cortex = 'cortex.domain.tar.gz'
 download_file(base_url, mESC, download_folder)
 download_file(base_url, cortex, download_folder)
-untar_mouse_domain(download_folder + mESC)
-untar_mouse_domain(download_folder + cortex)
-os.rename('mESC/HindIII_combined/total.HindIII.combined.domain',
-          'data/mm/mESC_domains_mm9.bed')
-os.rename('cortex/combined/total.combined.domain',
-          'data/mm/cortex_domains_mm9.bed')
+untar_mouse_domain(os.path.join(download_folder, mESC))
+untar_mouse_domain(os.path.join(download_folder, cortex))
+os.rename(os.path.join('mESC', 'HindIII_combined',
+                       'total.HindIII.combined.domain'),
+          os.path.join('data', 'mm', 'mESC_domains_mm9.bed'))
+os.rename(os.path.join('cortex', 'combined', 'total.combined.domain'),
+          os.path.join('data', 'mm', 'cortex_domains_mm9.bed'))
 shutil.rmtree('mESC')
 shutil.rmtree('cortex')
 
 # 5. mm9 Full Sequence
-mm9_download_folder = 'data/mm/mm9_fasta/'
+mm9_download_folder = os.path.join('data', 'mm', 'mm9_fasta')
 base_url = 'http://hgdownload.cse.ucsc.edu/goldenPath/mm9/chromosomes/'
 
 # Create download directory

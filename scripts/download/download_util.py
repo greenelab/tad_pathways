@@ -25,9 +25,10 @@ def process_repeats(base_dir, filename, genome):
     """
     Process the irregularly structured repeatmasker file
     """
+    import os
     from subprocess import call
 
-    full_loc = base_dir + filename
+    full_loc = os.path.join(base_dir, filename)
     call(['gunzip', full_loc])
 
     # Replace variable length space delimiters with tabs and output tsv file
