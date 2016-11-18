@@ -10,6 +10,7 @@
 
 import os
 import shutil
+import subprocess
 from download_util import download_file, process_repeats, untar_mouse_domain
 
 # Make new folder if it doesn't exist already
@@ -63,3 +64,7 @@ if not os.path.exists(mm9_download_folder):
 for chrom in list(range(1, 20)) + ['X', 'Y']:
     filename = 'chr{}.fa.gz'.format(chrom)
     download_file(base_url, filename, mm9_download_folder)
+
+# Unzip all chromosome files
+subprocess.call('gunzip {}'.format(os.path.join(mm9_download_folder, '*')),
+                shell=True)
