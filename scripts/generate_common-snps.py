@@ -1,5 +1,5 @@
 """
-(C) 2016 Gregory Way - TAD Pathways
+2016 Gregory Way - TAD Pathways
 scripts/generate_common-snps.py
 Modified from https://github.com/dhimmel/kg/blob/master/common-snps.ipynb
 
