@@ -1,0 +1,15 @@
+name: tad_pathways
+dependencies:
+- python=3.5.1
+- pandas=0.18.0
+- numexpr=2.5.2
+- numpy=1.11.1
+- jupyter=1.0.0 
+- requests=2.11.1
+- scipy=0.17.1
+- seaborn=0.7.1
+- matplotlib=1.5.3
+- pip:
+  - pyliftover==0.3
+  - biopython==1.68 
+  - PyVCF==0.6.8

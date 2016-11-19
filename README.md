@@ -33,6 +33,10 @@ TAD based gene lists. This will also perform a TAD pathways analysis for
 Bone Mineral Density GWAS.
 
 ```sh
+# Using python dependencies
+conda env create --quiet --force --file environment.yml
+source activate tad_pathways
+
 bash scripts/run_pipeline.sh
 ```
 
