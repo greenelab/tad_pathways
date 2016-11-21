@@ -11,6 +11,7 @@
 # 7. The Full hg19 Sequence
 
 import os
+import subprocess
 from download_util import download_file, process_repeats
 
 # Make new folder if it doesn't exist already
@@ -72,7 +73,7 @@ download_file(base_url, hESC, download_folder)
 download_file(base_url, IMR90, download_folder)
 
 # 7. The Full hg19 Sequence
-hg19_download_folder = 'data/hg/hg19_fasta/'
+hg19_download_folder = os.path.join('data', 'hg', 'hg19_fasta')
 base_url = 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/chromosomes/'
 
 # Create download directory
@@ -83,3 +84,7 @@ if not os.path.exists(hg19_download_folder):
 for chrom in list(range(1, 23)) + ['X', 'Y']:
     filename = 'chr{}.fa.gz'.format(chrom)
     download_file(base_url, filename, hg19_download_folder)
+
+# Unzip all chromosome files
+subprocess.call('gunzip {}'.format(os.path.join(hg19_download_folder, '*')),
+                shell=True)
