@@ -1,6 +1,6 @@
 """
 2016 Gregory Way
-scripts/visualize_genomic_elements.py
+scripts/visualize_gwas_distribution.py
 
 Description:
 Summarizes the location of genomic elements across TADs
@@ -17,6 +17,7 @@ Two .pdf plots in "figures/" describing the GWAS signal distribution across
 hESC and IMR90 TADs
 """
 
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -47,9 +48,9 @@ def curate_gwas_elements(tad_df, input_df):
                                  (chm_sub_df['position'] < end)]
 
         # Assign TAD information
-        elem_sub_df['TAD_id'] = tad_id
-        elem_sub_df['TAD_start'] = start
-        elem_sub_df['TAD_end'] = end
+        elem_sub_df = elem_sub_df.assign(TAD_id=tad_id)
+        elem_sub_df = elem_sub_df.assign(TAD_start=start)
+        elem_sub_df = elem_sub_df.assign(TAD_end=end)
 
         big_out_df = big_out_df.append(elem_sub_df, ignore_index=True)
 
@@ -71,13 +72,14 @@ for x in range(0, NUM_BINS, 10):
     xlab[x] = x
 
 # Load and process data
-gwas_df = pd.read_table('data/gwas_catalog_hg19.tsv')
+gwas_df = pd.read_table(os.path.join('data', 'hg', 'gwas_catalog_hg19.tsv'))
 
-hesc_df = load_tad('data/hg/hESC_domains_hg19.bed')
-imr_df = load_tad('data/hg/IMR90_domains_hg19.bed')
+hesc_df = load_tad(os.path.join('data', 'hg', 'hESC_domains_hg19.bed'))
+imr_df = load_tad(os.path.join('data', 'hg', 'IMR90_domains_hg19.bed'))
 
 gwas_df = gwas_df.dropna(subset=['CHR_POS', 'CHR_ID'])
 gwas_df = gwas_df[gwas_df['CHR_ID'] != 'Not Mapped']
+gwas_df = gwas_df[gwas_df['CHR_POS'] != 'Locus_Deleted']
 gwas_df = gwas_df.assign(chromosome=gwas_df.CHR_ID.str[3:].astype(str))
 gwas_df = gwas_df.assign(position=gwas_df.CHR_POS.astype(int))
 
@@ -104,7 +106,7 @@ p.set(xticklabels=xlab)
 p.set(ylabel='Number of GWAS signals', xlabel='TAD Bins')
 p.set_title('Distribution of SNPs across TADs')
 plt.tight_layout()
-plt.savefig('figures/hesc_gwas_distribution.pdf')
+plt.savefig(os.path.join('figures', 'hesc_gwas_distribution.pdf'))
 plt.close()
 
 p = sns.pointplot(x=summary_imr.index, y=summary_imr,
@@ -114,5 +116,5 @@ p.set(xticklabels=xlab)
 p.set(ylabel='Number of GWAS signals', xlabel='TAD Bins')
 p.set_title('Distribution of SNPs across TADs')
 plt.tight_layout()
-plt.savefig('figures/imr90_gwas_distribution.pdf')
+plt.savefig(os.path.join('figures', 'imr90_gwas_distribution.pdf'))
 plt.close()

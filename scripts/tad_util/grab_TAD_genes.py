@@ -17,7 +17,6 @@ in signal TADs
 
 import argparse
 import pandas as pd
-import math
 
 # Load Command Arguments
 

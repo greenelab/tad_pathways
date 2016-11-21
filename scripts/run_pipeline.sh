@@ -41,8 +41,9 @@ bash scripts/visualize.sh
 ##############################
 # Part 4: TAD Pathway Analysis
 ##############################
-# Convert human GWAS catalog to hg19
+# Convert human GWAS catalog to hg19 and visualize
 python scripts/convert_GWAS_catalog_hg19.py
+python scripts/visualize_gwas_distribution.py
 
 # Extract data from NHGRI-EBI GWAS catalog
 Rscript scripts/NHGRI-EBI_GWAS_summary.R
