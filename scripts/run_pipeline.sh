@@ -62,7 +62,7 @@ python scripts/build_TAD_genelists.py
 # An example output is given for BMD as 'data/gestat/BMD_gestalt.tsv'
 
 # Process WebGestalt Output
-python scripts/parse_gestalt.py -t BMD
+python scripts/parse_gestalt.py --trait 'BMD' --process
 
 ##############################
 # PART 5: Download eQTL data for trait of interest

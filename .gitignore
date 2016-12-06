@@ -2,3 +2,16 @@
 __pycache__/
 .Rhistory
 .ipynb_checkpoints/
+testing
+*.ipynb
+data/gwas_TAD_location/
+data/gwas_catalog/
+data/hg/
+data/mm/
+figures/
+index/
+TAD_based_genes/
+tables/SpannedGenesAcross*
+results/tad_*
+data/gestalt/
+tad_pathway/

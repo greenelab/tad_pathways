@@ -7,27 +7,37 @@ Take as input the .tsv results from the WebGestalt analysis and outputs trait
 specific TAD pathway genes
 
 Usage:
-Command line 'python scripts/parse_gestalt.py -t <TRAIT>'
+Command line 'python scripts/parse_gestalt.py' with the required flag:
 
-    -t <TRAIT> is predefined by the manual WebGestalt step (see README)
-    e.g. <TRAIT> is BMD for Bone Mineral Density
+    --trait              is predefined by the manual WebGestalt step
+                         (see README). Or it can be specified by the name of
+                         the gestalt output file name.
+                         Example 1: "BMD" for Bone Mineral Density GWAS
+                         Example 2: "custom_group" for file named -
+                                    "data/gestalt/custom_group_gestalt.tsv"
+
+And the optional flag:
+
+    --process_type      Defaults to update, if specified then
 
 Output:
-pickle files with pathway specific dictionaries and summary of pathway p values
+csv files with pathway specific information and summary of pathway p values
 """
 
 import os
 import argparse
 import pandas as pd
 import io
+import re
 
 
-def read_gestalt(fh):
+def read_gestalt(file_name, process):
     """
     Read in the gestalt data and parse pathways
 
     Arguments:
-    :param fh: the location of the file to read
+    :param file_name: the location of the file to read
+    :param process: the type of Gestalt file to parse
 
     Output:
     1) Pandas Dataframe of entire TRAIT pathways
@@ -35,8 +45,13 @@ def read_gestalt(fh):
     """
 
     # Read in the entire file as string
-    with open(fh, 'r') as trait_fh:
+    with open(file_name, 'r') as trait_fh:
         gestalt = trait_fh.read()
+
+    if process:
+        gestalt = re.sub('\n\t\t\t\t\t\n', '\n\n', gestalt)
+        gestalt = re.sub('\t\t\t\t\t\n', '\n', gestalt)
+        gestalt = re.sub('\t\t\t\n', '\n', gestalt)
 
     # Remove trailing whitespace from file
     gestalt = gestalt.rstrip()
@@ -83,7 +98,7 @@ def read_gestalt(fh):
     gen_info = return_df.groupby(['go_id', 'go_name',
                                   'adjP']).symbol.count().reset_index()
     gen_info.rename(columns={'symbol': 'num_genes'}, inplace=True)
-    gen_info = gen_info.sort_values(by='adjP')
+    gen_info = gen_info.sort_values(by=['adjP', 'go_name'])
 
     return return_df, gen_info
 
@@ -92,10 +107,15 @@ if __name__ == '__main__':
     # Load Command Arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--trait', help='symbol for trait data')
+    parser.add_argument('-p', '--process_type',
+                        help='deals with different Gestalt file types',
+                        action='store_false')
     args = parser.parse_args()
 
     # Load Constants
     trait = args.trait
+    process = args.process_type
+
     trait_file = os.path.join('data', 'gestalt',
                               '{}_gestalt.tsv'.format(trait))
     trait_out_file = os.path.join('data', 'gestalt',
@@ -103,7 +123,7 @@ if __name__ == '__main__':
     out_p_val = os.path.join('data', 'gestalt', '{}_pvalues.tsv'.format(trait))
 
     # Load Data
-    gestalt_data, gestalt_p = read_gestalt(trait_file)
+    gestalt_data, gestalt_p = read_gestalt(trait_file, process)
 
     # Write files
     gestalt_data.to_csv(trait_out_file, sep='\t', index=False)

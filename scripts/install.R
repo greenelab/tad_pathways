@@ -18,4 +18,8 @@ checkpoint("2016-02-25")
 library("readr")
 library("VennDiagram")
 library("dplyr")
+library("gridExtra")
+library("optparse")
 
+source("https://bioconductor.org/biocLite.R")
+biocLite("biomaRt", suppressUpdates = TRUE)

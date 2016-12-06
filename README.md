@@ -28,9 +28,17 @@ Struan Grant at grants@email.chop.edu
 
 ## Usage
 
+There are two ways to implement a TAD_Pathways analysis:
+
+1. Disease/Trait Specific - Uses GWAS identified SNPs
+2. Custom - Uses custom SNP list
+
+### Disease/Trait Specific
+
 Curates the GWAS catalog and TAD boundaries to visualize TADs and generate
 TAD based gene lists. This will also perform a TAD pathways analysis for
-Bone Mineral Density GWAS.
+Bone Mineral Density GWAS. This will reproduce the analysis and figures used
+in the paper.
 
 ```sh
 # Using python dependencies
@@ -44,7 +52,38 @@ This will download data, perform analyses, and output several genomic figures.
 The command will also output TAD based genes for 299 different GWAS traits.
 Our TAD_Pathways method can be applied directly using these gene lists.
 
-## Tad_Pathways
+### Custom
+
+TAD_Pathways is customizable and allows a user to prespecify any SNP list of
+interest to test TAD based pathway associations. To perform a custom analysis
+create a comma separated file where the first row of each column names the list
+of snps below in subsequent rows.
+
+E.g.: `custom_example.csv`
+
+| Group 1 | Group 2 |
+| ------- | ------- |
+| rs12345 | rs67891 |
+| rs19876 | rs54321 |
+
+Then, perform the following steps:
+
+```bash
+# Extract locations for SNP list
+Rscript --vanilla scripts/tad_util/build_snp_list.R \
+        --snp_file "custom_example.csv" \
+        --output_file "mapped_results.tsv"
+
+# Build TAD based genelists for each group
+python scripts/build_custom_TAD_genelist.py \
+       --snp_data_file "mapped_results.tsv" \
+       --output_file "custom_tad_genelist.tsv"
+
+# The output file is then ready for the manual "TAD_Pathways" steps below
+```
+
+
+## TAD_Pathways
 
 As a case study to demonstrate the utility of a TAD based approach,
 input the TAD based gene list for the Bone Mineral Density (1,297 genes) into a
@@ -67,11 +106,12 @@ pathway analysis on the gene list.
 | Significance Level | *Top10* |
 | Minimum Number of Genes for a Category | *4*
 
-Note - The output of `scripts/run_pipeline.sh` in *data/TAD_based_genes/* for all
-traits is ready for TAD Pathway Analysis.
+Note - The output of `scripts/run_pipeline.sh` in *data/TAD_based_genes/* for
+all traits is ready for TAD Pathway Analysis.
 
 After performing the WebGestalt analysis, click `Export TSV Only` and save the
-file in `data/gestalt/<TRAIT>_gestalt.tsv` where `<TRAIT>` is "BMD" for the example.
+file in `data/gestalt/<TRAIT>_gestalt.tsv` where `<TRAIT>` is "BMD" for the
+example.
 
 ## GWAS/eQTL Integration
 
