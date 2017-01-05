@@ -1,3 +1,11 @@
+**IMPORTANT: This repository is no longer maintained. In addition to running a TAD_Pathways
+analysis for Bone Mineral Density GWAS, this analysis pipeline downloads genomic data and
+explores distributions across TADs. A more streamlined analysis pipeline that does not require
+data preprocessing is available at https://github.com/greenelab/tad_pathways_pipeline**
+
+**NOTE: Several files built from this pipeline are used in the above repository including the
+TAD based gene index and the hg19 converted NHGRI-EBI GWAS Catalog.**
+
 # Incorporating TADs into GWAS Analysis - TAD_Pathways
 
 Gregory P. Way and Casey S. Greene 2016
