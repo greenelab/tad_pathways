@@ -51,11 +51,13 @@ else:
                      '"cortex"')
 
 REPEAT_FH = BASE_DIR + GENOME + '.fa.out.tsv'
+bmd_ld_windows = os.path.join('data', 'BMD_ldwindows.tsv')
 
 SNP_INDEX = 'index/SNP_index_' + GENOME + '_' + TAD_CELL + '.tsv.bz2'
 GENE_INDEX = 'index/GENE_index_' + GENOME + '_' + TAD_CELL + '.tsv.bz2'
 REPEAT_INDEX = 'index/REPEATS_index_' + GENOME + '_' + TAD_CELL + '.tsv.bz2'
 SPANNED_GENES_FH = 'tables/SpannedGenesAcross_' + TAD_CELL + '_TADs.tsv'
+bmd_window_genes_file = os.path.join('data', 'BMD_LDwindow_genes.tsv')
 
 
 def curate_tad_elements(tad_df, input_df, gen_class):
@@ -84,11 +86,15 @@ def curate_tad_elements(tad_df, input_df, gen_class):
         if gen_class == 'snp' and chrom != 'X':
             chrom = int(chrom)
 
+        if gen_class == 'LD':
+            chrom = 'chr{}'.format(chrom)
+
         chm_sub_df = input_df[input_df['chromosome'] == chrom]
 
         if gen_class == 'snp':
             elem_sub_df = chm_sub_df[(chm_sub_df['position'] >= start) &
                                      (chm_sub_df['position'] < end)]
+
         else:
             elem_sub_df = chm_sub_df[(chm_sub_df['start'] >= start) &
                                      (chm_sub_df['stop'] <= end)]
@@ -105,10 +111,16 @@ def curate_tad_elements(tad_df, input_df, gen_class):
                                     ignore_index=True)
             bnd_df = bnd_df.append(o_df, ignore_index=True)
 
-        # Assign TAD information
-        elem_sub_df['TAD_id'] = tad_id
-        elem_sub_df['TAD_start'] = start
-        elem_sub_df['TAD_end'] = end
+        if gen_class == 'LD':
+            # Assign LD information
+            elem_sub_df['rs_id'] = tad_id
+            elem_sub_df['LD_window_start'] = start
+            elem_sub_df['LD_window_end'] = end
+        else:
+            # Assign TAD information
+            elem_sub_df['TAD_id'] = tad_id
+            elem_sub_df['TAD_start'] = start
+            elem_sub_df['TAD_end'] = end
 
         big_out_df = big_out_df.append(elem_sub_df, ignore_index=True)
 
@@ -190,3 +202,10 @@ big_rep_tad_df, boundary_rep_df = curate_tad_elements(tad_df, repeats_df,
 
 big_rep_tad_df = big_rep_tad_df.append(boundary_rep_df, ignore_index=True)
 big_rep_tad_df.to_csv(REPEAT_INDEX, sep='\t', compression='bz2')
+
+####################################
+# PART 4 - BMD genes in LD Windows #
+####################################
+bmd_ld_df = pd.read_table(bmd_ld_windows, index_col=0)
+bmd_ld_genes_df, _ = curate_tad_elements(bmd_ld_df, refGene_df, gen_class='LD')
+bmd_ld_genes_df.to_csv(bmd_window_genes_file, sep='\t', index_col=0)
